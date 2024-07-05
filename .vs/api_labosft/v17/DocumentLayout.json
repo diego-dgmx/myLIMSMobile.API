@@ -1,0 +1,79 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{FD48F9A5-0DB5-4FE5-945B-6D7049E846E6}|Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj|c:\\users\\david-pc\\documents\\github\\labsoft_api\\mylimsmobile.api\\api_labosft\\labsoft.mylims.service.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{FD48F9A5-0DB5-4FE5-945B-6D7049E846E6}|Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj|solutionrelative:labsoft.mylims.service.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD48F9A5-0DB5-4FE5-945B-6D7049E846E6}|Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj|c:\\users\\david-pc\\documents\\github\\labsoft_api\\mylimsmobile.api\\api_labosft\\labsoft.mylims.service.api\\controllers\\oauthcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FD48F9A5-0DB5-4FE5-945B-6D7049E846E6}|Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj|solutionrelative:labsoft.mylims.service.api\\controllers\\oauthcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD48F9A5-0DB5-4FE5-945B-6D7049E846E6}|Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj|c:\\users\\david-pc\\documents\\github\\labsoft_api\\mylimsmobile.api\\api_labosft\\labsoft.mylims.service.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FD48F9A5-0DB5-4FE5-945B-6D7049E846E6}|Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj|solutionrelative:labsoft.mylims.service.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 298,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\appsettings.json",
+              "RelativeDocumentMoniker": "Labsoft.myLIMS.Service.API\\appsettings.json",
+              "ToolTip": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\appsettings.json",
+              "RelativeToolTip": "Labsoft.myLIMS.Service.API\\appsettings.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-06-26T23:19:21.859Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Program.cs",
+              "RelativeDocumentMoniker": "Labsoft.myLIMS.Service.API\\Program.cs",
+              "ToolTip": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Program.cs",
+              "RelativeToolTip": "Labsoft.myLIMS.Service.API\\Program.cs",
+              "ViewState": "AQIAAAgAAAAAAAAAAAAowCAAAAAfAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T23:19:07.033Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "OAuthController.cs",
+              "DocumentMoniker": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Controllers\\OAuthController.cs",
+              "RelativeDocumentMoniker": "Labsoft.myLIMS.Service.API\\Controllers\\OAuthController.cs",
+              "ToolTip": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Controllers\\OAuthController.cs",
+              "RelativeToolTip": "Labsoft.myLIMS.Service.API\\Controllers\\OAuthController.cs",
+              "ViewState": "AQIAADwAAAAAAAAAAAAAAE4AAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-26T23:18:57.443Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "UZo6RE3nqSxo6HSRmel2pcs6aZQo7x5s7+slnk4gW3U=",
+  "Source": "Labsoft.myLIMS.Service.API",
+  "BasePath": "_content/Labsoft.myLIMS.Service.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
