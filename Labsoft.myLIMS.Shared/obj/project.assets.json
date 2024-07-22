@@ -253,6 +253,19 @@
           "System.Xml.XDocument": "4.3.0"
         }
       },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.2": {
         "type": "package",
         "runtimeTargets": {
@@ -2084,6 +2097,36 @@
         "dotnet_library_license.txt",
         "netstandard.library.1.6.1.nupkg.sha512",
         "netstandard.library.nuspec"
+      ]
+    },
+    "Newtonsoft.Json/13.0.3": {
+      "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+      "type": "package",
+      "path": "newtonsoft.json/13.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/net6.0/Newtonsoft.Json.dll",
+        "lib/net6.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.0/Newtonsoft.Json.dll",
+        "lib/netstandard1.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.3/Newtonsoft.Json.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.xml",
+        "lib/netstandard2.0/Newtonsoft.Json.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.xml",
+        "newtonsoft.json.13.0.3.nupkg.sha512",
+        "newtonsoft.json.nuspec",
+        "packageIcon.png"
       ]
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.2": {
@@ -5903,7 +5946,8 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.6",
-      "Microsoft.IdentityModel.Clients.ActiveDirectory >= 5.3.0"
+      "Microsoft.IdentityModel.Clients.ActiveDirectory >= 5.3.0",
+      "Newtonsoft.Json >= 13.0.3"
     ]
   },
   "packageFolders": {
@@ -5913,11 +5957,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Shared\\Labsoft.myLIMS.Shared.csproj",
+      "projectUniqueName": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Shared\\Labsoft.myLIMS.Shared.csproj",
       "projectName": "Labsoft.myLIMS.Shared",
-      "projectPath": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Shared\\Labsoft.myLIMS.Shared.csproj",
+      "projectPath": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Shared\\Labsoft.myLIMS.Shared.csproj",
       "packagesPath": "C:\\Users\\David-PC\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Shared\\obj\\",
+      "outputPath": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Shared\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -5963,6 +6007,10 @@
           "Microsoft.IdentityModel.Clients.ActiveDirectory": {
             "target": "Package",
             "version": "[5.3.0, )"
+          },
+          "Newtonsoft.Json": {
+            "target": "Package",
+            "version": "[13.0.3, )"
           }
         },
         "imports": [

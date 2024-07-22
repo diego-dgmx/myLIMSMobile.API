@@ -5,6 +5,8 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text;
 using System.Text.Json.Serialization;
+using Newtonsoft.Json.Linq;
+using Labsoft.myLIMS.Service.API.Entities;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
 {
@@ -25,6 +27,18 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("get-data")]
         public async Task<IActionResult> GetData(string username, string password)
         {
+            var user = await GetUserByEmail(username);
+            if (user == null)
+            {
+                // Handle case where user is not found
+                Console.WriteLine("User not found.");
+            }
+            else
+            {
+                // Use user data as needed
+                Console.WriteLine($"User Identification: {user.Identification}");
+            }
+
             var clientId = _configuration["OAuth:ClientId"];
             var tokenUrl = _configuration["OAuth:TokenUrl"];
             var scope = _configuration["OAuth:Scope"];
@@ -53,11 +67,52 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             {
                 Data = token,
                 Message = "Acceso Autenticado Correctamente",
-                StatusCode = 200
+                StatusCode = 200,
+                DataTwo = user.Account.Identification
             };
 
             return Ok(result);
         }
+
+
+        public async Task<User> GetUserByEmail(string email)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Get, "https://produto.mylimsweb.cloud/api/v2/Users");
+                request.Headers.Add("x-access-key", "75a57345456abe22f9972a82973b3e3b");
+
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var jsonResponse = await response.Content.ReadAsStringAsync();
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        IgnoreReadOnlyProperties = true,
+                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                    };
+
+                    var rootObject = JsonSerializer.Deserialize<RootObject>(jsonResponse, options);
+                    var users = rootObject.Users;
+
+                    // Find the specific user by email
+                    return users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            catch (JsonException)
+            {
+                return null;
+            }
+
+            return null;
+        }
+
+
+
+
         private class TokenResponse
         {
             [JsonPropertyName("access_token")]
@@ -68,6 +123,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public class ApiResponse<T>
         {
             public T Data { get; set; }
+            public T? DataTwo { get; set; }
             public string Message { get; set; }
             public int StatusCode { get; set; }
         }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "iFl1ZKvs3ujgPRESZbwnJ7hIjMuVWDndUHW0/nv6rB3hs8i7PKT4m9nJsZqPV/mFL+xPcCsK7sFA2+Lbm7LnDw==",
+  "dgSpecHash": "jMlxstaiHpj7RNk28YZpa1qTISS7N4vtBWM73tGULjXyo9Ur1xr8xexyOkCdnc7uhmKOHzZ8Pi099vL1LKwKYA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Domain\\Labsoft.myLIMS.Domain.csproj",
+  "projectFilePath": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Domain\\Labsoft.myLIMS.Domain.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\David-PC\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\8.0.6\\microsoft.aspnetcore.authentication.jwtbearer.8.0.6.nupkg.sha512",
     "C:\\Users\\David-PC\\.nuget\\packages\\microsoft.csharp\\4.3.0\\microsoft.csharp.4.3.0.nupkg.sha512",
@@ -17,6 +17,7 @@
     "C:\\Users\\David-PC\\.nuget\\packages\\microsoft.netcore.targets\\1.1.3\\microsoft.netcore.targets.1.1.3.nupkg.sha512",
     "C:\\Users\\David-PC\\.nuget\\packages\\microsoft.win32.primitives\\4.3.0\\microsoft.win32.primitives.4.3.0.nupkg.sha512",
     "C:\\Users\\David-PC\\.nuget\\packages\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",
+    "C:\\Users\\David-PC\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
     "C:\\Users\\David-PC\\.nuget\\packages\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.debian.8-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
     "C:\\Users\\David-PC\\.nuget\\packages\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.fedora.23-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
     "C:\\Users\\David-PC\\.nuget\\packages\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl\\4.3.2\\runtime.fedora.24-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
