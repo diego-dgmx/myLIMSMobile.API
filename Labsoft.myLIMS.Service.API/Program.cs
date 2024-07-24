@@ -1,7 +1,5 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddHttpClient(); // Registrar HttpClient
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -18,6 +16,12 @@ builder.Services.AddCors(options =>
                    .AllowAnyHeader();
         });
 });
+
+//Configure API env settings
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+
+// Add external services scopes
+builder.Services.AddScoped<IAuthServices, AuthServices>();
 
 var app = builder.Build();
 
