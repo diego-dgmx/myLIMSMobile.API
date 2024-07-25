@@ -1,3 +1,6 @@
+using System.Net.Http.Headers;
+using Entities;
+using LabsoftAPI;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -6,7 +9,7 @@ public class AuthServices(HttpClient httpClient, IOptions<ApiSettings> settings)
     private readonly HttpClient _httpClient = httpClient;
     private readonly ApiSettings _settings = settings.Value;
 
-    public async Task<LoginResponse<LoginSuccessResponse, LoginErrorResponse>> Login(string email, string password)
+    public async Task<ExternalResponse<LoginResponse, ErrorResponse>> Login(string email, string password)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, _settings.LabsoftAuthURL)
         {
@@ -21,31 +24,76 @@ public class AuthServices(HttpClient httpClient, IOptions<ApiSettings> settings)
 
         var response = await _httpClient.SendAsync(request);
         var json = await response.Content.ReadAsStringAsync();
-        LoginResponse<LoginSuccessResponse, LoginErrorResponse> result;
-
+        ExternalResponse<LoginResponse, ErrorResponse> result;
         
         try
         {
             if(response.IsSuccessStatusCode)
             {
-                result = new LoginResponse<LoginSuccessResponse, LoginErrorResponse>
+                result = new ExternalResponse<LoginResponse, ErrorResponse>
                 {
-                    Success = JsonConvert.DeserializeObject<LoginSuccessResponse>(json)
+                    StatusCode = (int) response.StatusCode,
+                    Success = JsonConvert.DeserializeObject<LoginResponse>(json)
                 };
             }
             else
             {
-                result = new LoginResponse<LoginSuccessResponse, LoginErrorResponse>
+                result = new ExternalResponse<LoginResponse, ErrorResponse>
                 {
-                    Error = JsonConvert.DeserializeObject<LoginErrorResponse>(json)
+                    StatusCode = (int) response.StatusCode,
+                    Error = JsonConvert.DeserializeObject<ErrorResponse>(json)
                 };
             }
         }
         catch(Exception) {
-            result = new LoginResponse<LoginSuccessResponse, LoginErrorResponse>
+            result = new ExternalResponse<LoginResponse, ErrorResponse>
             {
-                Error = new LoginErrorResponse{
-                    ErrorDescription = "Unknown error, please try again"
+                Error = new ErrorResponse{
+                    Error = "unknown_error",
+                    ErrorDescription = "exception_error"
+                }
+            };
+        }
+
+        return result;
+    }
+
+    public async Task<ExternalResponse<MeResponse, ErrorResponse>> Me(string authToken, string email)
+    {
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", authToken);
+
+        var response = await _httpClient.GetAsync(
+            $"{_settings.LabsoftIdentityCenterApiURLBase}/Users/email/{email}");
+
+        var json = await response.Content.ReadAsStringAsync();
+        ExternalResponse<MeResponse, ErrorResponse> result;
+        
+        try
+        {
+            if(response.IsSuccessStatusCode)
+            {
+                result = new ExternalResponse<MeResponse, ErrorResponse>
+                {
+                    StatusCode = (int) response.StatusCode,
+                    Success = JsonConvert.DeserializeObject<MeResponse>(json)
+                };
+            }
+            else
+            {
+                result = new ExternalResponse<MeResponse, ErrorResponse>
+                {
+                    StatusCode = (int) response.StatusCode,
+                    Error = JsonConvert.DeserializeObject<ErrorResponse>(json)
+                };
+            }
+        }
+        catch(Exception) {
+            result = new ExternalResponse<MeResponse, ErrorResponse>
+            {
+                Error = new ErrorResponse{
+                    Error = "unknown_error",
+                    ErrorDescription = "exception_error"
                 }
             };
         }

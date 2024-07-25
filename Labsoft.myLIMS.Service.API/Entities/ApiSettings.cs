@@ -1,6 +1,10 @@
-public class ApiSettings
+namespace Entities
 {
-    public required string LabsoftAuthURL { get; set; }
-    public required string LabsoftAuthClientId { get; set; }
-    public required string LabsoftAuthScope { get; set; }
+    public class ApiSettings
+    {
+        public required string LabsoftAuthURL { get; set; }
+        public required string LabsoftIdentityCenterApiURLBase { get; set; }
+        public required string LabsoftAuthClientId { get; set; }
+        public required string LabsoftAuthScope { get; set; }
+    }
 }

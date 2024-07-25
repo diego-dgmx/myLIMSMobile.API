@@ -1,4 +1,7 @@
+using LabsoftAPI;
+
 public interface IAuthServices
 {
-    Task<LoginResponse<LoginSuccessResponse, LoginErrorResponse>> Login(string email, string password);
+    Task<ExternalResponse<LoginResponse, ErrorResponse>> Login(string email, string password);
+    Task<ExternalResponse<MeResponse, ErrorResponse>> Me(string authToken, string email);
 }
