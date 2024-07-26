@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj": {}
+    "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj": {
+    "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj",
+        "projectUniqueName": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj",
         "projectName": "Labsoft.myLIMS.Service.API",
-        "projectPath": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj",
+        "projectPath": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Service.API\\Labsoft.myLIMS.Service.API.csproj",
         "packagesPath": "C:\\Users\\David-PC\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\David-PC\\Documents\\GitHub\\labsoft_Api\\myLIMSMobile.API\\api_labosft\\Labsoft.myLIMS.Service.API\\obj\\",
+        "outputPath": "C:\\Users\\David-PC\\Documents\\GitHub\\myLIMSMobile.API\\Labsoft.myLIMS.Service.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -57,6 +57,10 @@
             "Microsoft.IdentityModel.Clients.ActiveDirectory": {
               "target": "Package",
               "version": "[5.3.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
