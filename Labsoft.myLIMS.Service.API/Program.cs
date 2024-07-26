@@ -1,4 +1,5 @@
 using Entities;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,7 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 
 // Add external services scopes
 builder.Services.AddScoped<IAuthServices, AuthServices>();
+builder.Services.AddScoped<ISamplesServices, SamplesServices>();
 
 var app = builder.Build();
 

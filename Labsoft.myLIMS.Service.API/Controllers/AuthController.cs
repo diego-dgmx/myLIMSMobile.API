@@ -1,6 +1,7 @@
 ﻿using Entities;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Mvc;
+using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
 {
