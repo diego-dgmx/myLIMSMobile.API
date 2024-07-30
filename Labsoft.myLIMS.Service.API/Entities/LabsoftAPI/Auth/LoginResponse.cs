@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace LabsoftAPI
+namespace LabsoftAPI.Auth
 {
     public class LoginResponse {
         [JsonProperty("access_token")]

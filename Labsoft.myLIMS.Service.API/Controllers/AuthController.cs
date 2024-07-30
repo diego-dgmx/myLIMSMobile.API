@@ -1,6 +1,8 @@
 ﻿using Entities;
 using LabsoftAPI;
+using LabsoftAPI.Auth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
@@ -33,68 +35,44 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("Me/{email}")]
         public async Task<IActionResult> Me(string email)
         {
-            if (Request.Headers.TryGetValue("Authorization", out var authorizationHeader))
+            var response = await _authServices.Me(email);
+            
+            if(response.StatusCode == 200)
             {
-                if(authorizationHeader.ToString().StartsWith("Bearer "))
-                {
-                    var token = authorizationHeader.ToString()["Bearer ".Length..].Trim();
-                    var response = await _authServices.Me(token, email);
+                var results = response.Success ?? [];
 
-                    return response.StatusCode switch
+                if(!results.IsNullOrEmpty())
+                {
+                    return StatusCode(response.StatusCode, new ResponseBase<List<MeResponse>>
                     {
-                        200 => StatusCode(response.StatusCode, new ResponseBase<MeResponse>
-                        {
-                            Data = response.Success
-                        }),
-                        204 => StatusCode(200, new ResponseBase<dynamic>
-                        {
-                            Message = "no_content"
-                        }),
-                        401 => Unauthorized(new ResponseBase<dynamic>
-                        {
-                            Ok = false,
-                            Message = "unauthorized_error",
-                            Error = new ErrorBase
-                            {
-                                Code = "unauthorized_error",
-                                Description = "expired_auth_token"
-                            }
-                        }),
-                        _ => StatusCode(500, new ResponseBase<dynamic>
-                        {
-                            Ok = false,
-                            Message = response.Error?.ErrorDescription ?? "internal_server_error",
-                            Error = new ErrorBase
-                            {
-                                Code = response.Error?.Error ?? "internal_server_error",
-                                Description = response.Error?.ErrorDescription ?? "unknown_error"
-                            }
-                        }),
-                    };
+                        Ok = response.Success != null,
+                        Data = results
+                    });
                 }
-                else {
-                    return Unauthorized(new ResponseBase<dynamic>
+                else
+                {
+                    return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                     {
                         Ok = false,
-                        Message = "unauthorized_error",
+                        Message = "email_not_exists",
                         Error = new ErrorBase
                         {
-                            Code = "unauthorized_error",
-                            Description = "invalid_auth_token"
+                            Code = "no_content",
+                            Description = "email_not_exists"
                         }
                     });
                 }
             }
             else
             {
-                return Unauthorized(new ResponseBase<dynamic>
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
-                    Message = "unauthorized_error",
+                    Message = response.Error?.ErrorDescription,
                     Error = new ErrorBase
                     {
-                        Code = "unauthorized_error",
-                        Description = "auth_token_not_present_in_headers"
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
                     }
                 });
             }

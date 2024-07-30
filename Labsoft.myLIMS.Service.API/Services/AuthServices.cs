@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using Entities;
 using LabsoftAPI;
+using LabsoftAPI.Auth;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -59,38 +60,42 @@ namespace Services {
             return result;
         }
 
-        public async Task<ExternalResponse<MeResponse, ErrorResponse>> Me(string authToken, string email)
+        public async Task<ExternalResponse<List<MeResponse>, ErrorResponse>> Me(string email)
         {
-            _httpClient.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", authToken);
-
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
             var response = await _httpClient.GetAsync(
-                $"{_settings.LabsoftIdentityCenterApiURLBase}/Users/email/{email}");
+                $"{_settings.MyLIMSApiURLBase}/Users?$filter=Email eq '{email}'");
 
             var json = await response.Content.ReadAsStringAsync();
-            ExternalResponse<MeResponse, ErrorResponse> result;
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MeResponse>>(json);
+
+            ExternalResponse<List<MeResponse>, ErrorResponse> result;
             
             try
             {
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<MeResponse, ErrorResponse>
+                    result = new ExternalResponse<List<MeResponse>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
-                        Success = JsonConvert.DeserializeObject<MeResponse>(json)
+                        Success = myLIMSResponse?.Result
                     };
                 }
                 else
                 {
-                    result = new ExternalResponse<MeResponse, ErrorResponse>
+                    result = new ExternalResponse<List<MeResponse>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
-                        Error = JsonConvert.DeserializeObject<ErrorResponse>(json)
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
                     };
                 }
             }
             catch(Exception) {
-                result = new ExternalResponse<MeResponse, ErrorResponse>
+                result = new ExternalResponse<List<MeResponse>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
