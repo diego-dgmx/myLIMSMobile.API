@@ -106,7 +106,7 @@ namespace LabsoftAPI {
         public object? SampleCustomInfo { get; set; }
         public int? Id { get; set; }
         public object? AnalysisDeadline { get; set; }
-        public object? Conclusion { get; set; }
+        public DateTime? Conclusion { get; set; }
         public Sample? Sample { get; set; }
         public AnalysisMethod? Method { get; set; }
         public ServiceArea? ServiceArea { get; set; }
@@ -132,7 +132,7 @@ namespace LabsoftAPI {
         public bool? Finalized { get; set; }
         public bool? Published { get; set; }
         public bool? Reviewed { get; set; }
-        public object? Conclusion { get; set; }
+        public DateTime? Conclusion { get; set; }
         public DateTime? TakenDateTime { get; set; }
         public DateTime? ReceivedTime { get; set; }
         public object? FinalizedTime { get; set; }

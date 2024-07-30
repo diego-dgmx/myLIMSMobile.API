@@ -131,11 +131,49 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Contains(item.Method?.MasterId ?? 0)).ToList();
                     }
                     
-                    var samples = results.Select(item => item.Sample!).ToList();
-
-                    return StatusCode(response.StatusCode, new ResponseBase<Pagination<Sample>>
+                    var samples = results.Select(item => new SampleDTO
                     {
-                        Data = new Pagination<Sample>
+                        Id = item.Sample?.Id,
+                        Identification = item.Sample?.Identification,
+                        Conclusion = item.Sample?.Conclusion,
+                        TakenDateTime = item.Sample?.TakenDateTime,
+                        ReceivedTime = item.Sample?.ReceivedTime,
+                        CurrentStatus = new Entities.CurrentStatus
+                        {
+                            Id = item.Sample?.CurrentStatus?.Id,
+                            SampleStatus = new Entities.SampleStatus
+                            {
+                                Id = item.Sample?.CurrentStatus?.SampleStatus?.Id,
+                                Identification = item.Sample?.CurrentStatus?.SampleStatus?.Identification,
+                                BeforeReceive = item.Sample?.CurrentStatus?.SampleStatus?.BeforeReceive,
+                                AfterPublish = item.Sample?.CurrentStatus?.SampleStatus?.AfterPublish,
+                                PortalSampleStatus = item.Sample?.CurrentStatus?.SampleStatus?.PortalSampleStatus
+                            }
+                        },
+                        ServiceArea = new Entities.ServiceArea
+                        {
+                            ExtraTime = item.ServiceArea?.ExtraTime,
+                            ExternalServiceArea = item.ServiceArea?.ExternalServiceArea,
+                            Active = item.ServiceArea?.Active,
+                            Id = item.ServiceArea?.Id,
+                            Identification = item.ServiceArea?.Identification
+                        },
+                        SampleType = new Entities.SampleType
+                        {
+                            Id = item.Sample?.SampleType?.Id,
+                            Identification = item.Sample?.SampleType?.Identification
+                        },
+                        Method = new Method
+                        {
+                            MasterId = item.Method?.MasterId,
+                            Id = item.Method?.Id,
+                            Identification = item.Method?.Identification
+                        }
+                    }).ToList();
+
+                    return StatusCode(response.StatusCode, new ResponseBase<Pagination<SampleDTO>>
+                    {
+                        Data = new Pagination<SampleDTO>
                         {
                             CurrentPage = page,
                             PerPage = perPage,
