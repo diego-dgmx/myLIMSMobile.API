@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Labsoft.myLIMS.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7d40076adf7df77b1f65099296bf87e40c01f727")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7b4b3a7bc5eb1e93eba1d0b7bad8ed09a1df0195")]
 [assembly: System.Reflection.AssemblyProductAttribute("Labsoft.myLIMS.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Labsoft.myLIMS.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

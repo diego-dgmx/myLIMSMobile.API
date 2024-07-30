@@ -12,6 +12,14 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     public class SamplesController(ISamplesServices samplesServices) : ControllerBase
     {
         private readonly ISamplesServices _samplesServices = samplesServices;
+        
+        [Flags]
+        private enum SampleType
+        {
+            carriedOutAnalysis = 1,
+            reviewAnalysis = 2,
+            prepareAnalysis = 4
+        }
 
         [HttpGet("GetAllMethods")]
         public async Task<IActionResult> GetAllMethods()
@@ -43,8 +51,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpGet("GetAllSamples")]
-        public async Task<IActionResult> GetAllSamples([FromQuery] int[] sampleIds, [FromQuery] int[] methodIds)
+        [HttpGet("GetSamplesSummary")]
+        public async Task<IActionResult> GetSamplesSummary([FromQuery] int[] sampleIds, [FromQuery] int[] methodIds)
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -53,33 +61,157 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 var results = response.Success ?? [];
 
                 if(!sampleIds.IsNullOrEmpty()) {
-                    results = results.Where(
-                        item => sampleIds.ToList().Contains(item.Sample?.Id ?? 0))
-                        .ToList();
+                    results = results.Where(item => sampleIds.ToList()
+                        .Contains(item.Sample?.Id ?? 0)).ToList();
                 }
 
                 if(!methodIds.IsNullOrEmpty()) {
-                    results = results.Where(
-                        item => methodIds.ToList().Contains(item.Method?.MasterId ?? 0))
-                        .ToList();
+                    results = results.Where(item => methodIds.ToList()
+                        .Contains(item.Method?.MasterId ?? 0)).ToList();
                 }
 
-                return StatusCode(response.StatusCode, new ResponseBase<AnalyticsSamples>
+                return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
                 {
                     Ok = response.Success != null,
-                    Data = new AnalyticsSamples
+                    Data = new SamplesSummary
                     {
-                        PrepareAnalytics = results.Where(item =>
-                            item?.CurrentStatus?.MethodStatus?.Id == 1)
-                            .Select(item => item.Sample!).ToList(),
-                        CarriedOutAnalytics = results.Where(item =>
-                            item?.CurrentStatus?.MethodStatus?.Id == 3)
-                            .Select(item => item.Sample!).ToList(),
-                        ReviewAnalytics = results.Where(item =>
-                            item?.CurrentStatus?.MethodStatus?.Id == 2)
-                            .Select(item => item.Sample!).ToList(),
+                        PrepareAnalysis = results.Where(item =>
+                            item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.prepareAnalysis)
+                            .Select(item => item.Sample!).Count(),
+                        CarriedOutAnalysis = results.Where(item =>
+                            item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.carriedOutAnalysis)
+                            .Select(item => item.Sample!).Count(),
+                        ReviewAnalysis = results.Where(item =>
+                            item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.reviewAnalysis)
+                            .Select(item => item.Sample!).Count(),
                         BatchQC = results.SelectMany(item => item.QCTests!)
-                            .Select(subItem => subItem.QCTest).ToList()
+                            .Select(subItem => subItem.QCTest).Count()
+                    }
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetSamples")]
+        public async Task<IActionResult> GetSamples(
+            [FromQuery] string? sampleType,
+            [FromQuery] int[] sampleIds,
+            [FromQuery] int[] methodIds,
+            [FromQuery] int perPage = 10,
+            [FromQuery] int page = 1)
+        {
+
+            if (Enum.TryParse<SampleType>(sampleType, out var type))
+            {
+                var response = await _samplesServices.GetAllSamples((int) type);
+
+                if(response.StatusCode == 200)
+                {
+                    var results = response.Success ?? [];
+
+                    if(!sampleIds.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleIds.ToList()
+                            .Contains(item.Sample?.Id ?? 0)).ToList();
+                    }
+
+                    if(!methodIds.IsNullOrEmpty()) {
+                        results = results.Where(item => methodIds.ToList()
+                            .Contains(item.Method?.MasterId ?? 0)).ToList();
+                    }
+                    
+                    var samples = results.Select(item => item.Sample!).ToList();
+
+                    return StatusCode(response.StatusCode, new ResponseBase<Pagination<Sample>>
+                    {
+                        Data = new Pagination<Sample>
+                        {
+                            CurrentPage = page,
+                            PerPage = perPage,
+                            TotalPages = (int) Math.Ceiling((double) samples.Count / perPage),
+                            TotalItems = samples.Count,
+                            Items = samples.Skip((page - 1) * perPage)
+                                .Take(perPage).ToList()
+                        }
+                    });
+                    
+                }
+                else
+                {
+                    return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                    {
+                        Ok = false,
+                        Message = response.Error?.ErrorDescription,
+                        Error = new ErrorBase
+                        {
+                            Code = response.Error?.Error,
+                            Description = response.Error?.ErrorDescription
+                        }
+                    });
+                }
+            }
+                else
+                {
+                    return BadRequest(new ResponseBase<dynamic>
+                    {
+                        Ok = false,
+                        Message = "invalid_sample_type",
+                        Error = new ErrorBase
+                        {
+                            Code = "bad_request",
+                            Description = "invalid_sample_type"
+                        }
+                    });
+            }
+        }
+
+        [HttpGet("GetBatchQCs")]
+        public async Task<IActionResult> GetBatchQCs(
+            [FromQuery] int[] sampleIds,
+            [FromQuery] int[] methodIds,
+            [FromQuery] int perPage = 10,
+            [FromQuery] int page = 1)
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                if(!sampleIds.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleIds.ToList()
+                        .Contains(item.Sample?.Id ?? 0)).ToList();
+                }
+
+                if(!methodIds.IsNullOrEmpty()) {
+                    results = results.Where(item => methodIds.ToList()
+                        .Contains(item.Method?.MasterId ?? 0)).ToList();
+                }
+
+                var batchQCs = results.SelectMany(item => item.QCTests!)
+                    .Select(subItem => subItem.QCTest).ToList();
+
+                return StatusCode(response.StatusCode, new ResponseBase<Pagination<QCTest>>
+                {
+                    Data = new Pagination<QCTest>
+                    {
+                        CurrentPage = page,
+                        PerPage = perPage,
+                        TotalPages = (int) Math.Ceiling((double) batchQCs.Count / perPage),
+                        TotalItems = batchQCs.Count,
+                        Items = batchQCs.Skip((page - 1) * perPage)
+                            .Take(perPage).ToList()
                     }
                 });
             }

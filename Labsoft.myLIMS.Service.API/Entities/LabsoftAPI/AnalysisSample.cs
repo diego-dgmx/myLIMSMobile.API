@@ -77,7 +77,7 @@ namespace LabsoftAPI {
     public class QCTests
     {
         public int? Id { get; set; }
-        public QCTest? QCTest { get; set; }
+        public required QCTest QCTest { get; set; }
         public object? SampleMethod { get; set; }
     }
 

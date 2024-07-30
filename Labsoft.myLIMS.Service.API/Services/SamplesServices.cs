@@ -1,4 +1,5 @@
 using System.Net.Http.Headers;
+using System.Web;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
@@ -57,11 +58,23 @@ namespace Services {
             return result;
         }
 
-        public async Task<ExternalResponse<List<AnalysisSample>, ErrorResponse>> GetAllSamples()
+        public async Task<ExternalResponse<List<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-            var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/Samples/GetAllMethodsForPerformTask");
+            
+            var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/Samples/GetAllMethodsForPerformTask");
+
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["$top"] = (await TotalCountSamples()).ToString();
+            query["$inlinecount"] = "allpages";
+            if(sampleType != null)
+            {
+                query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+            }
+
+            uriBuilder.Query = query.ToString();
+
+            var response = await _httpClient.GetAsync(uriBuilder.ToString());
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
@@ -102,6 +115,27 @@ namespace Services {
             }
 
             return result;
+        }
+
+        private async Task<int> TotalCountSamples(int? sampleType = null) {
+            var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/Samples/GetAllMethodsForPerformTask");
+
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["$top"] = "0";
+            query["$inlinecount"] = "allpages";
+            if(sampleType != null)
+            {
+                query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+            }
+
+            uriBuilder.Query = query.ToString();
+
+            var response = await _httpClient.GetAsync(uriBuilder.ToString());
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<dynamic>>(json);
+
+            return myLIMSResponse?.TotalCount ?? 0;
         }
     }
 }
