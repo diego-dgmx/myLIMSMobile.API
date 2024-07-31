@@ -1,6 +1,6 @@
 namespace Entities
 {
-    class Pagination<T>
+    public class Pagination<T>
     {
         public required int CurrentPage { get; set; }
         public required int PerPage { get; set; }

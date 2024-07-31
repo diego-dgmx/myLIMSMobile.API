@@ -43,7 +43,7 @@ namespace LabsoftAPI.Auth
 
     public class ServiceArea
     {
-        public object? ServiceCenter { get; set; }
+        public ServiceCenter? ServiceCenter { get; set; }
         public object? ExtraTime { get; set; }
         public bool ExternalServiceArea { get; set; }
         public bool Active { get; set; }

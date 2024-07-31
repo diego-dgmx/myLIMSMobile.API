@@ -15,11 +15,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         private readonly IAuthServices _authServices = authServices;
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest body)
+        public async Task<ActionResult<ResponseBase<LoginResponse>>> Login([FromBody] LoginRequest body)
         {
             var response = await _authServices.Login(body.Username, body.Password);
 
-            return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+            return StatusCode(response.StatusCode, new ResponseBase<LoginResponse>
             {
                 Ok = response.Success != null,
                 Data = response.Success,
@@ -33,7 +33,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("Me/{email}")]
-        public async Task<IActionResult> Me(string email)
+        public async Task<ActionResult<ResponseBase<MeResponse>>> Me(string email)
         {
             var response = await _authServices.Me(email);
             
@@ -43,10 +43,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
                 if(!results.IsNullOrEmpty())
                 {
-                    return StatusCode(response.StatusCode, new ResponseBase<List<MeResponse>>
+                    return StatusCode(response.StatusCode, new ResponseBase<MeResponse>
                     {
                         Ok = response.Success != null,
-                        Data = results
+                        Data = results[0]
                     });
                 }
                 else

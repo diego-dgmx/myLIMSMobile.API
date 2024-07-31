@@ -15,7 +15,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
             var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/Methods/GetAllWithServiceCenter");
+                $"{_settings.MyLIMSApiURLBase}/Methods/GetAllWithServiceCenter?$filter=Active eq true");
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisMethod>>(json);

@@ -22,7 +22,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetAllMethods")]
-        public async Task<IActionResult> GetAllMethods()
+        public async Task<ActionResult<ResponseBase<List<AnalysisMethod>>>> GetAllMethods()
         {
             var response = await _samplesServices.GetAllMethods();
             
@@ -52,7 +52,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetSamplesSummary")]
-        public async Task<IActionResult> GetSamplesSummary([FromQuery] int[] sampleIds, [FromQuery] int[] methodIds)
+        public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary([FromQuery] int[] sampleIds, [FromQuery] int[] methodIds)
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -105,7 +105,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetSamples")]
-        public async Task<IActionResult> GetSamples(
+        public async Task<ActionResult<ResponseBase<Pagination<SampleDTO>>>> GetSamples(
             [FromQuery] string? sampleType,
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
@@ -150,7 +150,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                                 PortalSampleStatus = item.Sample?.CurrentStatus?.SampleStatus?.PortalSampleStatus
                             }
                         },
-                        ServiceArea = new Entities.ServiceArea
+                        ServiceArea = new SampleServiceArea
                         {
                             ExtraTime = item.ServiceArea?.ExtraTime,
                             ExternalServiceArea = item.ServiceArea?.ExternalServiceArea,
@@ -215,7 +215,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetBatchQCs")]
-        public async Task<IActionResult> GetBatchQCs(
+        public async Task<ActionResult<ResponseBase<Pagination<QCTest>>>> GetBatchQCs(
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
             [FromQuery] int perPage = 10,
