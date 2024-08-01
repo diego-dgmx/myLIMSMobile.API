@@ -1,6 +1,7 @@
-var builder = WebApplication.CreateBuilder(args);
+using Entities;
+using Services;
 
-// Add services to the container.
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddHttpClient(); // Registrar HttpClient
@@ -18,6 +19,13 @@ builder.Services.AddCors(options =>
                    .AllowAnyHeader();
         });
 });
+
+//Configure API env settings
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
+
+// Add external services scopes
+builder.Services.AddScoped<IAuthServices, AuthServices>();
+builder.Services.AddScoped<ISamplesServices, SamplesServices>();
 
 var app = builder.Build();
 
