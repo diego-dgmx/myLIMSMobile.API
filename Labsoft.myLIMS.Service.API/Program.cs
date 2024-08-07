@@ -7,7 +7,15 @@ builder.Services.AddControllers();
 builder.Services.AddHttpClient(); // Registrar HttpClient
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Labsoft myLIMS Mobile API",
+        Version = "v1",
+        Description = "myLIMS data services"
+    });
+});
 
 builder.Services.AddCors(options =>
 {
@@ -33,7 +41,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Labsoft myLIMS Mobile API");
+    });
 }
 
 app.UseHttpsRedirection();
