@@ -51,8 +51,42 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableStages")]
+        public async Task<ActionResult<ResponseBase<List<MethodStatus>>>> GetAvailableStages()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<MethodStatus>>
+                {
+                    Ok = response.Success != null,
+                    Data = results.Select(sample => sample.CurrentStatus!.MethodStatus)
+                        .DistinctBy(m => m!.Id).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("GetSamplesSummary")]
-        public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary([FromQuery] int[] sampleIds, [FromQuery] int[] methodIds)
+        public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
+            [FromQuery] int[] sampleIds,
+            [FromQuery] int[] methodIds,
+            [FromQuery] int[] stageIds)
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -69,6 +103,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     results = results.Where(item => methodIds.ToList()
                         .Contains(item.Method?.MasterId ?? 0)).ToList();
                 }
+
+                if(!stageIds.IsNullOrEmpty()) {
+                        results = results.Where(item => stageIds.ToList()
+                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                    }
 
                 return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
                 {
@@ -109,6 +148,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] string? sampleType,
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
+            [FromQuery] int[] stageIds,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -129,6 +169,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!methodIds.IsNullOrEmpty()) {
                         results = results.Where(item => methodIds.ToList()
                             .Contains(item.Method?.MasterId ?? 0)).ToList();
+                    }
+
+                    if(!stageIds.IsNullOrEmpty()) {
+                        results = results.Where(item => stageIds.ToList()
+                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
                     }
                     
                     var samples = results.Select(item => new SampleDTO
