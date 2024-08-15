@@ -64,7 +64,84 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 {
                     Ok = response.Success != null,
                     Data = results.Select(sample => sample.CurrentStatus!.MethodStatus)
-                        .DistinctBy(m => m!.Id).ToList()!
+                        .DistinctBy(m => m!.Id).OrderBy(m => m?.Identification).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableSampleTypes")]
+        public async Task<ActionResult<ResponseBase<List<Entities.SampleType>>>> GetAvailableSampleTypes()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<Entities.SampleType>>
+                {
+                    Ok = response.Success != null,
+                    Data = [.. results.Select(sample => sample.Sample!.SampleType)
+                        .DistinctBy(m => m!.Id)
+                        .Select(sampleType => new Entities.SampleType
+                        {
+                            Id = sampleType!.Id,
+                            Identification = sampleType.Identification
+                        }).OrderBy(sampleType => sampleType.Identification)]
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableBatchQCs")]
+        public async Task<ActionResult<ResponseBase<List<BatchQC>>>> GetAvailableBatchQCs([FromQuery] string? numberSearch)
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var batchQCs = results.SelectMany(item => item.QCTests!)
+                    .Select(subItem => subItem.QCTest).ToList();
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<BatchQC>>
+                {
+                    Ok = response.Success != null,
+                    Data = batchQCs.Select(batch => batch)
+                        .DistinctBy(b => b.Number)
+                            .Select(batchQC => new BatchQC
+                            {
+                                Id = batchQC!.Number,
+                                Identification = batchQC.Number.ToString()
+                            }).Where(b => b.Id.ToString()!
+                                .Contains(numberSearch ?? ""))
+                                    .OrderBy(b => b.Id).ToList()!
                 });
             }
             else
@@ -86,7 +163,9 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
-            [FromQuery] int[] stageIds)
+            [FromQuery] int[] stageIds,
+            [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] batchNumbers)
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -105,9 +184,19 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 }
 
                 if(!stageIds.IsNullOrEmpty()) {
-                        results = results.Where(item => stageIds.ToList()
-                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
-                    }
+                    results = results.Where(item => stageIds.ToList()
+                        .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleTypeIds.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleTypeIds.ToList()
+                        .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!batchNumbers.IsNullOrEmpty()) {
+                    results = results.Where(item => (item.QCTests ?? [])
+                        .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
 
                 return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
                 {
@@ -149,6 +238,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
+            [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] batchNumbers,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -174,6 +265,16 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!stageIds.IsNullOrEmpty()) {
                         results = results.Where(item => stageIds.ToList()
                             .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleTypeIds.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleTypeIds.ToList()
+                            .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                    }
+
+                    if(!batchNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => (item.QCTests ?? [])
+                            .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
                     }
                     
                     var samples = results.Select(item => new SampleDTO
@@ -263,6 +364,9 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<Pagination<QCTest>>>> GetBatchQCs(
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
+            [FromQuery] int[] stageIds,
+            [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] batchNumbers,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -280,6 +384,21 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!methodIds.IsNullOrEmpty()) {
                     results = results.Where(item => methodIds.ToList()
                         .Contains(item.Method?.MasterId ?? 0)).ToList();
+                }
+
+                if(!stageIds.IsNullOrEmpty()) {
+                    results = results.Where(item => stageIds.ToList()
+                        .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleTypeIds.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleTypeIds.ToList()
+                        .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!batchNumbers.IsNullOrEmpty()) {
+                    results = results.Where(item => (item.QCTests ?? [])
+                        .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
                 }
 
                 var batchQCs = results.SelectMany(item => item.QCTests!)
