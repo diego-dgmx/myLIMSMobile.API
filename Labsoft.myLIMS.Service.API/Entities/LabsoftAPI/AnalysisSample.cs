@@ -32,7 +32,7 @@ namespace LabsoftAPI {
         public bool? IsRework { get; set; }
         public bool? InProcess { get; set; }
         public object? ExecuteUser { get; set; }
-        public object? ExecuteDateTime { get; set; }
+        public DateTime? ExecuteDateTime { get; set; }
         public StartUser? StartUser { get; set; }
         public DateTime? StartDateTime { get; set; }
     }
@@ -105,7 +105,7 @@ namespace LabsoftAPI {
         public int? ConclusionEmpty { get; set; }
         public object? SampleCustomInfo { get; set; }
         public int? Id { get; set; }
-        public object? AnalysisDeadline { get; set; }
+        public DateTime? AnalysisDeadline { get; set; }
         public DateTime? Conclusion { get; set; }
         public Sample? Sample { get; set; }
         public AnalysisMethod? Method { get; set; }

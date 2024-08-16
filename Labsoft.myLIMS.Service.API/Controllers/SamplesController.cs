@@ -1,12 +1,13 @@
 using Entities;
 using LabsoftAPI;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
 {
-
+    [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
     public class SamplesController(ISamplesServices samplesServices) : ControllerBase
