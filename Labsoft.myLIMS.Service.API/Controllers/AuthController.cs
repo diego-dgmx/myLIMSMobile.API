@@ -8,7 +8,7 @@ using Services;
 namespace Labsoft.myLIMS.Service.API.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class AuthController(IAuthServices authServices) : ControllerBase
     {

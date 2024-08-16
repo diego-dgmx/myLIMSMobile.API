@@ -7,7 +7,7 @@ using Services;
 namespace Labsoft.myLIMS.Service.API.Controllers
 {
 
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class SamplesController(ISamplesServices samplesServices) : ControllerBase
     {
@@ -165,7 +165,19 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
-            [FromQuery] int[] batchNumbers)
+            [FromQuery] int[] batchNumbers,
+            [FromQuery] DateTime? validityStartDate,
+            [FromQuery] DateTime? validityEndDate,
+            [FromQuery] DateTime? executionStartDate,
+            [FromQuery] DateTime? executionEndDate,
+            [FromQuery] DateTime? conclusionStartDate,
+            [FromQuery] DateTime? conclusionEndDate,
+            [FromQuery] DateTime? receiptStartDate,
+            [FromQuery] DateTime? receiptEndDate,
+            [FromQuery] DateTime? startStartDate,
+            [FromQuery] DateTime? startEndDate,
+            [FromQuery] DateTime? collectStartDate,
+            [FromQuery] DateTime? collectEndDate)
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -196,6 +208,42 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(validityStartDate != null && validityStartDate != null) {
+                    results = results.Where(
+                        item => item.AnalysisDeadline >= validityStartDate &&
+                        item.AnalysisDeadline <= validityEndDate).ToList();
+                }
+
+                if(executionStartDate != null && executionStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                        item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                }
+
+                if(conclusionStartDate != null && conclusionStartDate != null) {
+                    results = results.Where(
+                        item => item.Conclusion >= conclusionStartDate &&
+                        item.Conclusion <= conclusionEndDate).ToList();
+                }
+
+                if(receiptStartDate != null && receiptStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                        item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                }
+
+                if(startStartDate != null && startStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                        item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                }
+
+                if(collectStartDate != null && collectStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.TakenDateTime >= collectStartDate &&
+                        item.Sample.TakenDateTime <= collectEndDate).ToList();
                 }
 
                 return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
@@ -240,6 +288,18 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] DateTime? validityStartDate,
+            [FromQuery] DateTime? validityEndDate,
+            [FromQuery] DateTime? executionStartDate,
+            [FromQuery] DateTime? executionEndDate,
+            [FromQuery] DateTime? conclusionStartDate,
+            [FromQuery] DateTime? conclusionEndDate,
+            [FromQuery] DateTime? receiptStartDate,
+            [FromQuery] DateTime? receiptEndDate,
+            [FromQuery] DateTime? startStartDate,
+            [FromQuery] DateTime? startEndDate,
+            [FromQuery] DateTime? collectStartDate,
+            [FromQuery] DateTime? collectEndDate,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -275,6 +335,42 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!batchNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => (item.QCTests ?? [])
                             .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                    }
+
+                    if(validityStartDate != null && validityStartDate != null) {
+                        results = results.Where(
+                            item => item.AnalysisDeadline >= validityStartDate &&
+                            item.AnalysisDeadline <= validityEndDate).ToList();
+                    }
+
+                    if(executionStartDate != null && executionStartDate != null) {
+                        results = results.Where(
+                            item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                            item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                    }
+
+                    if(conclusionStartDate != null && conclusionStartDate != null) {
+                        results = results.Where(
+                            item => item.Conclusion >= conclusionStartDate &&
+                            item.Conclusion <= conclusionEndDate).ToList();
+                    }
+
+                    if(receiptStartDate != null && receiptStartDate != null) {
+                        results = results.Where(
+                            item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                            item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                    }
+
+                    if(startStartDate != null && startStartDate != null) {
+                        results = results.Where(
+                            item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                            item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                    }
+
+                    if(collectStartDate != null && collectStartDate != null) {
+                        results = results.Where(
+                            item => item.Sample?.TakenDateTime >= collectStartDate &&
+                            item.Sample.TakenDateTime <= collectEndDate).ToList();
                     }
                     
                     var samples = results.Select(item => new SampleDTO
@@ -367,6 +463,18 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] DateTime? validityStartDate,
+            [FromQuery] DateTime? validityEndDate,
+            [FromQuery] DateTime? executionStartDate,
+            [FromQuery] DateTime? executionEndDate,
+            [FromQuery] DateTime? conclusionStartDate,
+            [FromQuery] DateTime? conclusionEndDate,
+            [FromQuery] DateTime? receiptStartDate,
+            [FromQuery] DateTime? receiptEndDate,
+            [FromQuery] DateTime? startStartDate,
+            [FromQuery] DateTime? startEndDate,
+            [FromQuery] DateTime? collectStartDate,
+            [FromQuery] DateTime? collectEndDate,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -399,6 +507,42 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(validityStartDate != null && validityStartDate != null) {
+                    results = results.Where(
+                        item => item.AnalysisDeadline >= validityStartDate &&
+                        item.AnalysisDeadline <= validityEndDate).ToList();
+                }
+
+                if(executionStartDate != null && executionStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                        item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                }
+
+                if(conclusionStartDate != null && conclusionStartDate != null) {
+                    results = results.Where(
+                        item => item.Conclusion >= conclusionStartDate &&
+                        item.Conclusion <= conclusionEndDate).ToList();
+                }
+
+                if(receiptStartDate != null && receiptStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                        item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                }
+
+                if(startStartDate != null && startStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                        item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                }
+
+                if(collectStartDate != null && collectStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.TakenDateTime >= collectStartDate &&
+                        item.Sample.TakenDateTime <= collectEndDate).ToList();
                 }
 
                 var batchQCs = results.SelectMany(item => item.QCTests!)
