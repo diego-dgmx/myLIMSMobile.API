@@ -48,4 +48,10 @@ namespace Entities
         public int? Id { get; set; }
         public string? Identification { get; set; }
     }
+
+    public class BatchQC
+    {
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
+    }
 }

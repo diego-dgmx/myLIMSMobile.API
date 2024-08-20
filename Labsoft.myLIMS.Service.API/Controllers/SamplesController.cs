@@ -1,13 +1,14 @@
 using Entities;
 using LabsoftAPI;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
 {
-
-    [Route("api/[controller]")]
+    [Authorize]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public class SamplesController(ISamplesServices samplesServices) : ControllerBase
     {
@@ -51,8 +52,133 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableStages")]
+        public async Task<ActionResult<ResponseBase<List<MethodStatus>>>> GetAvailableStages()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<MethodStatus>>
+                {
+                    Ok = response.Success != null,
+                    Data = results.Select(sample => sample.CurrentStatus!.MethodStatus)
+                        .DistinctBy(m => m!.Id).OrderBy(m => m?.Identification).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableSampleTypes")]
+        public async Task<ActionResult<ResponseBase<List<Entities.SampleType>>>> GetAvailableSampleTypes()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<Entities.SampleType>>
+                {
+                    Ok = response.Success != null,
+                    Data = [.. results.Select(sample => sample.Sample!.SampleType)
+                        .DistinctBy(m => m!.Id)
+                        .Select(sampleType => new Entities.SampleType
+                        {
+                            Id = sampleType!.Id,
+                            Identification = sampleType.Identification
+                        }).OrderBy(sampleType => sampleType.Identification)]
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableBatchQCs")]
+        public async Task<ActionResult<ResponseBase<List<BatchQC>>>> GetAvailableBatchQCs([FromQuery] string? numberSearch)
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var batchQCs = results.SelectMany(item => item.QCTests!)
+                    .Select(subItem => subItem.QCTest).ToList();
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<BatchQC>>
+                {
+                    Ok = response.Success != null,
+                    Data = batchQCs.Select(batch => batch)
+                        .DistinctBy(b => b.Number)
+                            .Select(batchQC => new BatchQC
+                            {
+                                Id = batchQC!.Number,
+                                Identification = batchQC.Number.ToString()
+                            }).Where(b => b.Id.ToString()!
+                                .Contains(numberSearch ?? ""))
+                                    .OrderBy(b => b.Id).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("GetSamplesSummary")]
-        public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary([FromQuery] int[] sampleIds, [FromQuery] int[] methodIds)
+        public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
+            [FromQuery] int[] sampleIds,
+            [FromQuery] int[] methodIds,
+            [FromQuery] int[] stageIds,
+            [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] batchNumbers,
+            [FromQuery] DateTime? validityStartDate,
+            [FromQuery] DateTime? validityEndDate,
+            [FromQuery] DateTime? executionStartDate,
+            [FromQuery] DateTime? executionEndDate,
+            [FromQuery] DateTime? conclusionStartDate,
+            [FromQuery] DateTime? conclusionEndDate,
+            [FromQuery] DateTime? receiptStartDate,
+            [FromQuery] DateTime? receiptEndDate,
+            [FromQuery] DateTime? startStartDate,
+            [FromQuery] DateTime? startEndDate,
+            [FromQuery] DateTime? collectStartDate,
+            [FromQuery] DateTime? collectEndDate)
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -68,6 +194,57 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!methodIds.IsNullOrEmpty()) {
                     results = results.Where(item => methodIds.ToList()
                         .Contains(item.Method?.MasterId ?? 0)).ToList();
+                }
+
+                if(!stageIds.IsNullOrEmpty()) {
+                    results = results.Where(item => stageIds.ToList()
+                        .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleTypeIds.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleTypeIds.ToList()
+                        .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!batchNumbers.IsNullOrEmpty()) {
+                    results = results.Where(item => (item.QCTests ?? [])
+                        .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(validityStartDate != null && validityStartDate != null) {
+                    results = results.Where(
+                        item => item.AnalysisDeadline >= validityStartDate &&
+                        item.AnalysisDeadline <= validityEndDate).ToList();
+                }
+
+                if(executionStartDate != null && executionStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                        item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                }
+
+                if(conclusionStartDate != null && conclusionStartDate != null) {
+                    results = results.Where(
+                        item => item.Conclusion >= conclusionStartDate &&
+                        item.Conclusion <= conclusionEndDate).ToList();
+                }
+
+                if(receiptStartDate != null && receiptStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                        item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                }
+
+                if(startStartDate != null && startStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                        item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                }
+
+                if(collectStartDate != null && collectStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.TakenDateTime >= collectStartDate &&
+                        item.Sample.TakenDateTime <= collectEndDate).ToList();
                 }
 
                 return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
@@ -109,6 +286,21 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] string? sampleType,
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
+            [FromQuery] int[] stageIds,
+            [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] batchNumbers,
+            [FromQuery] DateTime? validityStartDate,
+            [FromQuery] DateTime? validityEndDate,
+            [FromQuery] DateTime? executionStartDate,
+            [FromQuery] DateTime? executionEndDate,
+            [FromQuery] DateTime? conclusionStartDate,
+            [FromQuery] DateTime? conclusionEndDate,
+            [FromQuery] DateTime? receiptStartDate,
+            [FromQuery] DateTime? receiptEndDate,
+            [FromQuery] DateTime? startStartDate,
+            [FromQuery] DateTime? startEndDate,
+            [FromQuery] DateTime? collectStartDate,
+            [FromQuery] DateTime? collectEndDate,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -129,6 +321,57 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!methodIds.IsNullOrEmpty()) {
                         results = results.Where(item => methodIds.ToList()
                             .Contains(item.Method?.MasterId ?? 0)).ToList();
+                    }
+
+                    if(!stageIds.IsNullOrEmpty()) {
+                        results = results.Where(item => stageIds.ToList()
+                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleTypeIds.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleTypeIds.ToList()
+                            .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                    }
+
+                    if(!batchNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => (item.QCTests ?? [])
+                            .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                    }
+
+                    if(validityStartDate != null && validityStartDate != null) {
+                        results = results.Where(
+                            item => item.AnalysisDeadline >= validityStartDate &&
+                            item.AnalysisDeadline <= validityEndDate).ToList();
+                    }
+
+                    if(executionStartDate != null && executionStartDate != null) {
+                        results = results.Where(
+                            item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                            item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                    }
+
+                    if(conclusionStartDate != null && conclusionStartDate != null) {
+                        results = results.Where(
+                            item => item.Conclusion >= conclusionStartDate &&
+                            item.Conclusion <= conclusionEndDate).ToList();
+                    }
+
+                    if(receiptStartDate != null && receiptStartDate != null) {
+                        results = results.Where(
+                            item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                            item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                    }
+
+                    if(startStartDate != null && startStartDate != null) {
+                        results = results.Where(
+                            item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                            item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                    }
+
+                    if(collectStartDate != null && collectStartDate != null) {
+                        results = results.Where(
+                            item => item.Sample?.TakenDateTime >= collectStartDate &&
+                            item.Sample.TakenDateTime <= collectEndDate).ToList();
                     }
                     
                     var samples = results.Select(item => new SampleDTO
@@ -218,6 +461,21 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<Pagination<QCTest>>>> GetBatchQCs(
             [FromQuery] int[] sampleIds,
             [FromQuery] int[] methodIds,
+            [FromQuery] int[] stageIds,
+            [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] batchNumbers,
+            [FromQuery] DateTime? validityStartDate,
+            [FromQuery] DateTime? validityEndDate,
+            [FromQuery] DateTime? executionStartDate,
+            [FromQuery] DateTime? executionEndDate,
+            [FromQuery] DateTime? conclusionStartDate,
+            [FromQuery] DateTime? conclusionEndDate,
+            [FromQuery] DateTime? receiptStartDate,
+            [FromQuery] DateTime? receiptEndDate,
+            [FromQuery] DateTime? startStartDate,
+            [FromQuery] DateTime? startEndDate,
+            [FromQuery] DateTime? collectStartDate,
+            [FromQuery] DateTime? collectEndDate,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
@@ -235,6 +493,57 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!methodIds.IsNullOrEmpty()) {
                     results = results.Where(item => methodIds.ToList()
                         .Contains(item.Method?.MasterId ?? 0)).ToList();
+                }
+
+                if(!stageIds.IsNullOrEmpty()) {
+                    results = results.Where(item => stageIds.ToList()
+                        .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleTypeIds.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleTypeIds.ToList()
+                        .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!batchNumbers.IsNullOrEmpty()) {
+                    results = results.Where(item => (item.QCTests ?? [])
+                        .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(validityStartDate != null && validityStartDate != null) {
+                    results = results.Where(
+                        item => item.AnalysisDeadline >= validityStartDate &&
+                        item.AnalysisDeadline <= validityEndDate).ToList();
+                }
+
+                if(executionStartDate != null && executionStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                        item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                }
+
+                if(conclusionStartDate != null && conclusionStartDate != null) {
+                    results = results.Where(
+                        item => item.Conclusion >= conclusionStartDate &&
+                        item.Conclusion <= conclusionEndDate).ToList();
+                }
+
+                if(receiptStartDate != null && receiptStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                        item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                }
+
+                if(startStartDate != null && startStartDate != null) {
+                    results = results.Where(
+                        item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                        item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                }
+
+                if(collectStartDate != null && collectStartDate != null) {
+                    results = results.Where(
+                        item => item.Sample?.TakenDateTime >= collectStartDate &&
+                        item.Sample.TakenDateTime <= collectEndDate).ToList();
                 }
 
                 var batchQCs = results.SelectMany(item => item.QCTests!)
