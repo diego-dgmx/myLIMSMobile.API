@@ -163,6 +163,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("GetSamplesSummary")]
         public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
             [FromQuery] int[] sampleIds,
+            [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
@@ -189,6 +190,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleIds.ToList()
                         .Contains(item.Sample?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleIdentifications.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleIdentifications.ToList()
+                        .Any(identification => (item.Sample?.Identification ?? "")
+                            .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
                 }
 
                 if(!methodIds.IsNullOrEmpty()) {
@@ -285,6 +293,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<Pagination<SampleDTO>>>> GetSamples(
             [FromQuery] string? sampleType,
             [FromQuery] int[] sampleIds,
+            [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
@@ -316,6 +325,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!sampleIds.IsNullOrEmpty()) {
                         results = results.Where(item => sampleIds.ToList()
                             .Contains(item.Sample?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleIdentifications.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleIdentifications.ToList()
+                            .Any(identification => (item.Sample?.Identification ?? "")
+                                .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                    .ToList();
                     }
 
                     if(!methodIds.IsNullOrEmpty()) {
@@ -460,6 +476,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("GetBatchQCs")]
         public async Task<ActionResult<ResponseBase<Pagination<QCTest>>>> GetBatchQCs(
             [FromQuery] int[] sampleIds,
+            [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
@@ -488,6 +505,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleIds.ToList()
                         .Contains(item.Sample?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleIdentifications.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleIdentifications.ToList()
+                        .Any(identification => (item.Sample?.Identification ?? "")
+                            .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
                 }
 
                 if(!methodIds.IsNullOrEmpty()) {
