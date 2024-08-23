@@ -59,4 +59,9 @@ namespace Entities
         public int? Id { get; set; }
         public string? Identification { get; set; }
     }
+
+    public class CollectionPoint {
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
+    }
 }
