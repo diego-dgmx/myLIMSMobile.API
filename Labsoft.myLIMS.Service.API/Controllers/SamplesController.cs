@@ -160,6 +160,49 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableSampleNumbers")]
+        public async Task<ActionResult<ResponseBase<List<SampleNumber>>>> GetAvailableSampleNumbers([FromQuery] string? numberSearch)
+        {
+            var response = await _samplesServices.GetAllSamples();
+
+            if (response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var sampleNumbers = results
+                    .Select(item => item.Sample)
+                    .Where(sample => sample?.Number != null)
+                    .Select(sample => new SampleNumber
+                    {
+                        Id = sample!.Number,
+                        Identification = sample.Number.ToString()
+                    })
+                    .DistinctBy(sn => sn.Id)
+                    .Where(sn => sn.Id.ToString()!.Contains(numberSearch ?? ""))
+                    .OrderBy(sn => sn.Id)
+                    .ToList();
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<SampleNumber>>
+                {
+                    Ok = response.Success != null,
+                    Data = sampleNumbers
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("GetSamplesSummary")]
         public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
             [FromQuery] int[] sampleIds,
@@ -167,6 +210,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] int[] sampleNumbers,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -209,6 +253,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(!sampleNumbers.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleNumbers.ToList()
+                            .Contains(item?.Sample?.Number ?? 0)).ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {
@@ -289,6 +338,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] int[] sampleNumbers,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -336,6 +386,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!batchNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => (item.QCTests ?? [])
                             .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                    }
+
+                    if(!sampleNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleNumbers.ToList()
+                            .Contains(item?.Sample?.Number ?? 0)).ToList();
                     }
 
                     if(validityStartDate != null && validityStartDate != null) {
@@ -464,6 +519,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] int[] sampleNumbers,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -503,6 +559,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleTypeIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleTypeIds.ToList()
                         .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleNumbers.ToList()
+                            .Contains(item?.Sample?.Number ?? 0)).ToList();
                 }
 
                 if(!batchNumbers.IsNullOrEmpty()) {
