@@ -213,6 +213,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 {
                     Ok = response.Success != null,
                     Data = results.Select(sample => sample.CurrentStatus?.StartUser)
+                        .Where(user => user != null)
                         .DistinctBy(m => m?.Id)
                         .OrderBy(m => m?.Identification).ToList()!
                 });
@@ -442,7 +443,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
                     if(!startUserIds.IsNullOrEmpty()) {
                         results = results.Where(item => startUserIds.ToList()
-                            .Contains(item?.Sample?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
+                            .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
                     }
 
                     if(!batchNumbers.IsNullOrEmpty()) {
@@ -634,7 +635,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
                 if(!startUserIds.IsNullOrEmpty()) {
                     results = results.Where(item => startUserIds.ToList()
-                        .Contains(item?.Sample?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
+                        .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
                 }
 
                 if(!batchNumbers.IsNullOrEmpty()) {
