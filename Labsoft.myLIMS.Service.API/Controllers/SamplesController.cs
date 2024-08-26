@@ -200,6 +200,38 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableStartUsers")]
+        public async Task<ActionResult<ResponseBase<List<StartUser>>>> GetAvailableStartUsers()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<StartUser>>
+                {
+                    Ok = response.Success != null,
+                    Data = results.Select(sample => sample.CurrentStatus?.StartUser)
+                        .DistinctBy(m => m?.Id)
+                        .OrderBy(m => m?.Identification).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+        
         [HttpGet("GetSamplesSummary")]
         public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
             [FromQuery] int[] sampleIds,
@@ -208,6 +240,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
@@ -258,6 +291,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleTypeIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleTypeIds.ToList()
                         .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!startUserIds.IsNullOrEmpty()) {
+                    results = results.Where(item => startUserIds.ToList()
+                        .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
                 }
 
                 if(!batchNumbers.IsNullOrEmpty()) {
@@ -344,6 +382,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
@@ -399,6 +438,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!sampleTypeIds.IsNullOrEmpty()) {
                         results = results.Where(item => sampleTypeIds.ToList()
                             .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                    }
+
+                    if(!startUserIds.IsNullOrEmpty()) {
+                        results = results.Where(item => startUserIds.ToList()
+                            .Contains(item?.Sample?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
                     }
 
                     if(!batchNumbers.IsNullOrEmpty()) {
@@ -533,6 +577,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] stageIds,
             [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
@@ -585,6 +630,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleTypeIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleTypeIds.ToList()
                         .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                }
+
+                if(!startUserIds.IsNullOrEmpty()) {
+                    results = results.Where(item => startUserIds.ToList()
+                        .Contains(item?.Sample?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
                 }
 
                 if(!batchNumbers.IsNullOrEmpty()) {
