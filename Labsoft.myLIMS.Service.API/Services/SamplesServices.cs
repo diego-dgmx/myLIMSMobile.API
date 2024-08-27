@@ -3,6 +3,7 @@ using System.Web;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace Services {
@@ -106,6 +107,53 @@ namespace Services {
             }
             catch(Exception) {
                 result = new ExternalResponse<List<AnalysisSample>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<AnalysisSample, ErrorResponse>> ValidateSampleCode(int barCode)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+            var response = await _httpClient.GetAsync(
+                $"{_settings.MyLIMSApiURLBase}/Samples/GetAllMethodsForPerformTaskByBarCode?barCode={barCode}");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
+
+            ExternalResponse<AnalysisSample, ErrorResponse> result;
+
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<AnalysisSample, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = (myLIMSResponse?.Result ?? []).IsNullOrEmpty() ? null : myLIMSResponse?.Result?[0]
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<AnalysisSample, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<AnalysisSample, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",

@@ -709,5 +709,72 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpGet("ValidateSampleCode")]
+        public async Task<ActionResult<ResponseBase<SampleDTO>>> ValidateSampleCode(int code)
+        {
+            var response = await _samplesServices.ValidateSampleCode(code);
+            
+            // Validate success data because if code not match with any sample the API response with status 200
+            if(response.Success != null)
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<SampleDTO>
+                {
+                    Ok = response.Success != null,
+                    Data = new SampleDTO
+                    {
+                        Id = response.Success?.Sample?.Id,
+                        Identification = response.Success?.Sample?.Identification,
+                        Conclusion = response.Success?.Sample?.Conclusion,
+                        TakenDateTime = response.Success?.Sample?.TakenDateTime,
+                        ReceivedTime = response.Success?.Sample?.ReceivedTime,
+                        CurrentStatus = new Entities.CurrentStatus
+                        {
+                            Id = response.Success?.Sample?.CurrentStatus?.Id,
+                            SampleStatus = new Entities.SampleStatus
+                            {
+                                Id = response.Success?.Sample?.CurrentStatus?.SampleStatus?.Id,
+                                Identification = response.Success?.Sample?.CurrentStatus?.SampleStatus?.Identification,
+                                BeforeReceive = response.Success?.Sample?.CurrentStatus?.SampleStatus?.BeforeReceive,
+                                AfterPublish = response.Success?.Sample?.CurrentStatus?.SampleStatus?.AfterPublish,
+                                PortalSampleStatus = response.Success?.Sample?.CurrentStatus?.SampleStatus?.PortalSampleStatus
+                            }
+                        },
+                        ServiceArea = new SampleServiceArea
+                        {
+                            ExtraTime = response.Success?.ServiceArea?.ExtraTime,
+                            ExternalServiceArea = response.Success?.ServiceArea?.ExternalServiceArea,
+                            Active = response.Success?.ServiceArea?.Active,
+                            Id = response.Success?.ServiceArea?.Id,
+                            Identification = response.Success?.ServiceArea?.Identification
+                        },
+                        SampleType = new Entities.SampleType
+                        {
+                            Id = response.Success?.Sample?.SampleType?.Id,
+                            Identification = response.Success?.Sample?.SampleType?.Identification
+                        },
+                        Method = new Method
+                        {
+                            MasterId = response.Success?.Method?.MasterId,
+                            Id = response.Success?.Method?.Id,
+                            Identification = response.Success?.Method?.Identification
+                        }
+                    }
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = "sample_not_exists",
+                    Error = new ErrorBase
+                    {
+                        Code = "not_exists",
+                        Description = "sample_not_exists"
+                    }
+                });
+            }
+        }
     }
 }
