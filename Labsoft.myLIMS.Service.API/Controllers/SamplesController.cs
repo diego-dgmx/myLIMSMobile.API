@@ -245,6 +245,51 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpGet("GetAvailableSampleReasons")]
+        public async Task<ActionResult<ResponseBase<List<Entities.SampleReason>>>> GetAvailableSampleReasons([FromQuery] string? reasonSearch)
+        {
+            // Assuming _samplesServices is a service that interacts with the data layer
+            var response = await _samplesServices.GetAllSamples();
+
+            if (response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var sampleReasons = results
+                    .Select(item => item.Sample?.SampleReason)
+                    .Where(reason => reason != null)
+                    .DistinctBy(reason => new { reason?.Id, })
+                    .Select(reason => new Entities.SampleReason
+                    {
+                        Id = reason?.Id,
+                        Identification = reason?.Identification
+                    })
+                    .Where(sr => string.IsNullOrEmpty(reasonSearch) || sr.Identification!.Contains(reasonSearch, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(sr => sr.Id)
+                    .ToList();
+
+                return Ok(new ResponseBase<List<Entities.SampleReason>>
+                {
+                    Ok = true,
+                    Data = sampleReasons
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         
 
         [HttpGet("GetSamplesSummary")]
@@ -256,6 +301,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] batchNumbers,
             [FromQuery] int[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
+            [FromQuery] int[] sampleReasons,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -308,6 +354,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!collectionPoints.IsNullOrEmpty()) {
                     results = results.Where(item => collectionPoints.ToList()
                             .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleReasons.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleReasons.ToList()
+                            .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {
@@ -390,6 +441,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] batchNumbers,
             [FromQuery] int[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
+            [FromQuery] int[] sampleReasons,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -447,6 +499,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!collectionPoints.IsNullOrEmpty()) {
                         results = results.Where(item => collectionPoints.ToList()
                                 .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleReasons.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleReasons.ToList()
+                                .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
                     }
 
                     if(validityStartDate != null && validityStartDate != null) {
@@ -577,6 +634,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] batchNumbers,
             [FromQuery] int[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
+            [FromQuery] int[] sampleReasons,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -631,6 +689,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!collectionPoints.IsNullOrEmpty()) {
                     results = results.Where(item => collectionPoints.ToList()
                             .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleReasons.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleReasons.ToList()
+                            .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {
