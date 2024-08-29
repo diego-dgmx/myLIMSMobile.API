@@ -243,6 +243,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] customValues,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -302,6 +303,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(!customValues.IsNullOrEmpty()) {
+                    results = results.Where(item => customValues.ToList()
+                        .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                            .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {
@@ -385,6 +393,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] customValues,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -449,6 +458,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     if(!batchNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => (item.QCTests ?? [])
                             .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                    }
+
+                    if(!customValues.IsNullOrEmpty()) {
+                        results = results.Where(item => customValues.ToList()
+                            .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                                .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                    .ToList();
                     }
 
                     if(validityStartDate != null && validityStartDate != null) {
@@ -580,6 +596,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] customValues,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -641,6 +658,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(!customValues.IsNullOrEmpty()) {
+                    results = results.Where(item => customValues.ToList()
+                        .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                            .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {

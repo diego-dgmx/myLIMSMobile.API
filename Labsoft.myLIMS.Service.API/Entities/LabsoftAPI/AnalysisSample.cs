@@ -103,7 +103,7 @@ namespace LabsoftAPI {
         public List<object>? PrerequisiteAnalyses { get; set; }
         public int? AnalysisDeadlineEmpty { get; set; }
         public int? ConclusionEmpty { get; set; }
-        public object? SampleCustomInfo { get; set; }
+        public SampleCustomInfo? SampleCustomInfo { get; set; }
         public int? Id { get; set; }
         public DateTime? AnalysisDeadline { get; set; }
         public DateTime? Conclusion { get; set; }
@@ -258,5 +258,13 @@ namespace LabsoftAPI {
         public object? WorkConclusion { get; set; }
         public object? WorkClass { get; set; }
         public object? WorkSubClass { get; set; }
+    }
+
+    public class SampleCustomInfo {
+        public string? DisplayValue { get; set; }
+        public int InfoTypeId { get; set; }
+        public string? ForceScale { get; set; }
+        public string? ForceSignifDigits { get; set; }
+        public string? ValueDateTime { get; set; }
     }
 }
