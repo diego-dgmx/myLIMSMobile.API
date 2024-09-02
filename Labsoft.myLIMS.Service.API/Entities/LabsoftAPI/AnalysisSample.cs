@@ -103,7 +103,7 @@ namespace LabsoftAPI {
         public List<object>? PrerequisiteAnalyses { get; set; }
         public int? AnalysisDeadlineEmpty { get; set; }
         public int? ConclusionEmpty { get; set; }
-        public object? SampleCustomInfo { get; set; }
+        public SampleCustomInfo? SampleCustomInfo { get; set; }
         public int? Id { get; set; }
         public DateTime? AnalysisDeadline { get; set; }
         public DateTime? Conclusion { get; set; }
@@ -151,7 +151,7 @@ namespace LabsoftAPI {
         public CurrentStatus? CurrentStatus { get; set; }
         public SampleType? SampleType { get; set; }
         public object? CollectionPointId { get; set; }
-        public object? CollectionPoint { get; set; }
+        public CollectionPointBasic? CollectionPoint { get; set; }
         public Account? Account { get; set; }
         public object? RelatedAccount { get; set; }
         public List<SampleWork>? SampleWorks { get; set; }
@@ -258,5 +258,36 @@ namespace LabsoftAPI {
         public object? WorkConclusion { get; set; }
         public object? WorkClass { get; set; }
         public object? WorkSubClass { get; set; }
+    }
+
+    public class SampleCustomInfo {
+        public string? DisplayValue { get; set; }
+        public int InfoTypeId { get; set; }
+        public string? ForceScale { get; set; }
+        public string? ForceSignifDigits { get; set; }
+        public string? ValueDateTime { get; set; }
+    }
+    
+    public class CollectionPointBasic
+    {
+        public bool? Active { get; set; }
+        public string? Address1 { get; set; }
+        public string? ZipCode { get; set; }
+        public string? District { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
+        public decimal? Altitude { get; set; }
+        public string? Route { get; set; }
+        public int? Sequence { get; set; }
+        public bool? Priority { get; set; }
+        public bool? UnrestrictedAccessServiceCenter { get; set; }
+        public object? Account { get; set; }
+        public object? Country { get; set; }
+        public object? State { get; set; }
+        public object? City { get; set; } 
+        public object? SampleReason { get; set; } 
+        public object? CollectionPointClass { get; set; } 
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
     }
 }

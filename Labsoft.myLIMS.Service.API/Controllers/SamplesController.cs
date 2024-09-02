@@ -83,6 +83,46 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableServiceAreas")]
+        public async Task<ActionResult<ResponseBase<List<SampleServiceArea>>>> GetAvailableServiceAreas()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<SampleServiceArea>>
+                {
+                    Ok = response.Success != null,
+                    Data = results.Select(sample => sample.ServiceArea)
+                        .DistinctBy(m => m?.Id)
+                        .Select(m => new SampleServiceArea
+                        {
+                            Id = m?.Id,
+                            ExtraTime = m?.ExtraTime,
+                            ExternalServiceArea = m?.ExternalServiceArea,
+                            Active = m?.Active,
+                            Identification = m?.Identification
+                        })
+                        .OrderBy(m => m?.Identification).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+        
         [HttpGet("GetAvailableSampleTypes")]
         public async Task<ActionResult<ResponseBase<List<Entities.SampleType>>>> GetAvailableSampleTypes()
         {
@@ -160,13 +200,230 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableStartUsers")]
+        public async Task<ActionResult<ResponseBase<List<StartUser>>>> GetAvailableStartUsers()
+        {
+            var response = await _samplesServices.GetAllSamples();
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<StartUser>>
+                {
+                    Ok = response.Success != null,
+                    Data = results.Select(sample => sample.CurrentStatus?.StartUser)
+                        .Where(user => user != null)
+                        .DistinctBy(m => m?.Id)
+                        .OrderBy(m => m?.Identification).ToList()!
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableSampleNumbers")]
+        public async Task<ActionResult<ResponseBase<List<SampleNumber>>>> GetAvailableSampleNumbers([FromQuery] string? numberSearch)
+        {
+            var response = await _samplesServices.GetAllSamples();
+
+            if (response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var sampleNumbers = results
+                    .Select(item => item.Sample)
+                    .Where(sample => sample?.Number != null)
+                    .Select(sample => new SampleNumber
+                    {
+                        Id = sample!.Number,
+                        Identification = sample.Number.ToString()
+                    })
+                    .DistinctBy(sn => sn.Id)
+                    .Where(sn => sn.Id.ToString()!.Contains(numberSearch ?? ""))
+                    .OrderBy(sn => sn.Id)
+                    .ToList();
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<SampleNumber>>
+                {
+                    Ok = response.Success != null,
+                    Data = sampleNumbers
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableCollectionPoints")]
+        public async Task<ActionResult<ResponseBase<List<CollectionPoint>>>> GetAvailableCollectionPoints([FromQuery] string? pointSearch)
+        {
+            var response = await _samplesServices.GetAllSamples();
+
+            if (response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var collectionPoints = results
+                    .Select(item => item.Sample)
+                    .Where(sample => sample?.CollectionPoint?.Identification != null)
+                    .Select(sample => new CollectionPoint
+                    {
+                        Id = sample!.CollectionPoint?.Id,
+                        Identification = sample.CollectionPoint?.Identification
+                    })
+                    .DistinctBy(sn => sn.Id)
+                    .Where(sn => sn.Id.ToString()!.Contains(pointSearch ?? ""))
+                    .OrderBy(sn => sn.Id)
+                    .ToList();
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<CollectionPoint>>
+                {
+                    Ok = response.Success != null,
+                    Data = collectionPoints
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableSampleReasons")]
+        public async Task<ActionResult<ResponseBase<List<Entities.SampleReason>>>> GetAvailableSampleReasons([FromQuery] string? reasonSearch)
+        {
+            // Assuming _samplesServices is a service that interacts with the data layer
+            var response = await _samplesServices.GetAllSamples();
+
+            if (response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                var sampleReasons = results
+                    .Select(item => item.Sample?.SampleReason)
+                    .Where(reason => reason != null)
+                    .DistinctBy(reason => new { reason?.Id, })
+                    .Select(reason => new Entities.SampleReason
+                    {
+                        Id = reason?.Id,
+                        Identification = reason?.Identification
+                    })
+                    .Where(sr => string.IsNullOrEmpty(reasonSearch) || sr.Identification!.Contains(reasonSearch, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(sr => sr.Id)
+                    .ToList();
+
+                return Ok(new ResponseBase<List<Entities.SampleReason>>
+                {
+                    Ok = true,
+                    Data = sampleReasons
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableActivities")]
+        public async Task<ActionResult<ResponseBase<List<SampleActivity>>>> GetActivities([FromQuery] string? activitySearch)
+        {
+            // Assuming _activitiesService is a service that interacts with the data layer
+            var response = await _samplesServices.GetAllSamples();
+        
+            if (response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                // Use SelectMany to flatten the collection of SampleWorks and extract activities
+                var activities = results
+                    .SelectMany(item => item.Sample?.SampleWorks ?? new List<SampleWork>()) // Flatten the collection
+                    .Where(activity => activity != null)
+                    .DistinctBy(activity => new { activity.Work?.Id, activity.Work?.ControlNumber }) // Ensure uniqueness by Id and Name
+                    .Select(activity => new Entities.SampleActivity
+                    {
+                        Id = activity.Work?.Id,
+                        Identification = activity.Work?.ControlNumber
+                    })
+                    .Where(a => string.IsNullOrEmpty(activitySearch) || a.Identification!.Contains(activitySearch, StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(a => a.Id)
+                    .ToList();
+
+                return Ok(new ResponseBase<List<SampleActivity>>
+                {
+                    Ok = true,
+                    Data = activities
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+
+        }
+
         [HttpGet("GetSamplesSummary")]
         public async Task<ActionResult<ResponseBase<SamplesSummary>>> GetSamplesSummary(
             [FromQuery] int[] sampleIds,
+            [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
+            [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] customValues,
+            [FromQuery] int[] sampleNumbers,
+            [FromQuery] int[] collectionPoints,
+            [FromQuery] int[] sampleReasons,
+            [FromQuery] int[] sampleActivities,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -191,6 +448,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         .Contains(item.Sample?.Id ?? 0)).ToList();
                 }
 
+                if(!sampleIdentifications.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleIdentifications.ToList()
+                        .Any(identification => (item.Sample?.Identification ?? "")
+                            .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
+                }
+
                 if(!methodIds.IsNullOrEmpty()) {
                     results = results.Where(item => methodIds.ToList()
                         .Contains(item.Method?.MasterId ?? 0)).ToList();
@@ -201,14 +465,51 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
                 }
 
+                if(!serviceAreaIds.IsNullOrEmpty()) {
+                    results = results.Where(item => serviceAreaIds.ToList()
+                        .Contains(item.ServiceArea?.Id ?? 0)).ToList();
+                }
+
                 if(!sampleTypeIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleTypeIds.ToList()
                         .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
                 }
 
+                if(!startUserIds.IsNullOrEmpty()) {
+                    results = results.Where(item => startUserIds.ToList()
+                        .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
+                }
+
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(!customValues.IsNullOrEmpty()) {
+                    results = results.Where(item => customValues.ToList()
+                        .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                            .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
+                }
+                                
+                if(!sampleNumbers.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleNumbers.ToList()
+                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                }
+
+                if(!collectionPoints.IsNullOrEmpty()) {
+                    results = results.Where(item => collectionPoints.ToList()
+                            .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleReasons.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleReasons.ToList()
+                            .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleActivities.IsNullOrEmpty()) {
+                    results = results.Where(item => (item.Sample?.SampleWorks ?? [])
+                            .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {
@@ -285,10 +586,18 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<Pagination<SampleDTO>>>> GetSamples(
             [FromQuery] string? sampleType,
             [FromQuery] int[] sampleIds,
+            [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
+            [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] customValues,
+            [FromQuery] int[] sampleNumbers,
+            [FromQuery] int[] collectionPoints,
+            [FromQuery] int[] sampleReasons,
+            [FromQuery] int[] sampleActivities,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -318,6 +627,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Contains(item.Sample?.Id ?? 0)).ToList();
                     }
 
+                    if(!sampleIdentifications.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleIdentifications.ToList()
+                            .Any(identification => (item.Sample?.Identification ?? "")
+                                .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                    .ToList();
+                    }
+
                     if(!methodIds.IsNullOrEmpty()) {
                         results = results.Where(item => methodIds.ToList()
                             .Contains(item.Method?.MasterId ?? 0)).ToList();
@@ -328,14 +644,51 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
                     }
 
+                    if(!serviceAreaIds.IsNullOrEmpty()) {
+                        results = results.Where(item => serviceAreaIds.ToList()
+                            .Contains(item.ServiceArea?.Id ?? 0)).ToList();
+                    }
+
                     if(!sampleTypeIds.IsNullOrEmpty()) {
                         results = results.Where(item => sampleTypeIds.ToList()
                             .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
                     }
 
+                    if(!startUserIds.IsNullOrEmpty()) {
+                        results = results.Where(item => startUserIds.ToList()
+                            .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
+                    }
+
                     if(!batchNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => (item.QCTests ?? [])
                             .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                    }
+
+                    if(!customValues.IsNullOrEmpty()) {
+                        results = results.Where(item => customValues.ToList()
+                            .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                                .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                    .ToList();
+                    }
+
+                    if(!sampleNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleNumbers.ToList()
+                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                    }
+
+                    if(!collectionPoints.IsNullOrEmpty()) {
+                        results = results.Where(item => collectionPoints.ToList()
+                                .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleReasons.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleReasons.ToList()
+                                .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleActivities.IsNullOrEmpty()) {
+                        results = results.Where(item => (item.Sample?.SampleWorks ?? [])
+                                .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                     }
 
                     if(validityStartDate != null && validityStartDate != null) {
@@ -460,10 +813,18 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("GetBatchQCs")]
         public async Task<ActionResult<ResponseBase<Pagination<QCTest>>>> GetBatchQCs(
             [FromQuery] int[] sampleIds,
+            [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
             [FromQuery] int[] stageIds,
+            [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
+            [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] customValues,
+            [FromQuery] int[] sampleNumbers,
+            [FromQuery] int[] collectionPoints,
+            [FromQuery] int[] sampleReasons,
+            [FromQuery] int[] sampleActivities,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -490,6 +851,13 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         .Contains(item.Sample?.Id ?? 0)).ToList();
                 }
 
+                if(!sampleIdentifications.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleIdentifications.ToList()
+                        .Any(identification => (item.Sample?.Identification ?? "")
+                            .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
+                }
+
                 if(!methodIds.IsNullOrEmpty()) {
                     results = results.Where(item => methodIds.ToList()
                         .Contains(item.Method?.MasterId ?? 0)).ToList();
@@ -500,14 +868,51 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
                 }
 
+                if(!serviceAreaIds.IsNullOrEmpty()) {
+                    results = results.Where(item => serviceAreaIds.ToList()
+                        .Contains(item.ServiceArea?.Id ?? 0)).ToList();
+                }
+
                 if(!sampleTypeIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleTypeIds.ToList()
                         .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
                 }
 
+                if(!startUserIds.IsNullOrEmpty()) {
+                    results = results.Where(item => startUserIds.ToList()
+                        .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
+                }
+                
+                if(!sampleNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleNumbers.ToList()
+                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                }
+
                 if(!batchNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => (item.QCTests ?? [])
                         .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                }
+
+                if(!customValues.IsNullOrEmpty()) {
+                    results = results.Where(item => customValues.ToList()
+                        .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                            .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                .ToList();
+                }
+                
+                if(!collectionPoints.IsNullOrEmpty()) {
+                    results = results.Where(item => collectionPoints.ToList()
+                            .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleReasons.IsNullOrEmpty()) {
+                    results = results.Where(item => sampleReasons.ToList()
+                            .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
+                }
+
+                if(!sampleActivities.IsNullOrEmpty()) {
+                    results = results.Where(item => (item.Sample?.SampleWorks ?? [])
+                            .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                 }
 
                 if(validityStartDate != null && validityStartDate != null) {
@@ -572,6 +977,73 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     {
                         Code = response.Error?.Error,
                         Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("ValidateSampleCode")]
+        public async Task<ActionResult<ResponseBase<SampleDTO>>> ValidateSampleCode(int code)
+        {
+            var response = await _samplesServices.ValidateSampleCode(code);
+            
+            // Validate success data because if code not match with any sample the API response with status 200
+            if(response.Success != null)
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<SampleDTO>
+                {
+                    Ok = response.Success != null,
+                    Data = new SampleDTO
+                    {
+                        Id = response.Success?.Sample?.Id,
+                        Identification = response.Success?.Sample?.Identification,
+                        Conclusion = response.Success?.Sample?.Conclusion,
+                        TakenDateTime = response.Success?.Sample?.TakenDateTime,
+                        ReceivedTime = response.Success?.Sample?.ReceivedTime,
+                        CurrentStatus = new Entities.CurrentStatus
+                        {
+                            Id = response.Success?.Sample?.CurrentStatus?.Id,
+                            SampleStatus = new Entities.SampleStatus
+                            {
+                                Id = response.Success?.Sample?.CurrentStatus?.SampleStatus?.Id,
+                                Identification = response.Success?.Sample?.CurrentStatus?.SampleStatus?.Identification,
+                                BeforeReceive = response.Success?.Sample?.CurrentStatus?.SampleStatus?.BeforeReceive,
+                                AfterPublish = response.Success?.Sample?.CurrentStatus?.SampleStatus?.AfterPublish,
+                                PortalSampleStatus = response.Success?.Sample?.CurrentStatus?.SampleStatus?.PortalSampleStatus
+                            }
+                        },
+                        ServiceArea = new SampleServiceArea
+                        {
+                            ExtraTime = response.Success?.ServiceArea?.ExtraTime,
+                            ExternalServiceArea = response.Success?.ServiceArea?.ExternalServiceArea,
+                            Active = response.Success?.ServiceArea?.Active,
+                            Id = response.Success?.ServiceArea?.Id,
+                            Identification = response.Success?.ServiceArea?.Identification
+                        },
+                        SampleType = new Entities.SampleType
+                        {
+                            Id = response.Success?.Sample?.SampleType?.Id,
+                            Identification = response.Success?.Sample?.SampleType?.Identification
+                        },
+                        Method = new Method
+                        {
+                            MasterId = response.Success?.Method?.MasterId,
+                            Id = response.Success?.Method?.Id,
+                            Identification = response.Success?.Method?.Identification
+                        }
+                    }
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = "sample_not_exists",
+                    Error = new ErrorBase
+                    {
+                        Code = "not_exists",
+                        Description = "sample_not_exists"
                     }
                 });
             }
