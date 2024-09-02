@@ -54,4 +54,24 @@ namespace Entities
         public int? Id { get; set; }
         public string? Identification { get; set; }
     }
+
+    public class SampleNumber {
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
+    }
+
+    public class CollectionPoint {
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
+    }
+
+    public class SampleReason{
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
+    }
+
+    public class SampleActivity{
+        public int? Id { get; set; }
+        public string? Identification { get; set; }
+    }
 }
