@@ -234,30 +234,31 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetAvailableSampleNumbers")]
-        public async Task<ActionResult<ResponseBase<List<SampleNumber>>>> GetAvailableSampleNumbers([FromQuery] string? numberSearch)
+        public async Task<ActionResult<ResponseBase<List<SampleNumber>>>> GetAvailableControlNumbers([FromQuery] string? numberSearch)
         {
             var response = await _samplesServices.GetAllSamples();
-
+        
             if (response.StatusCode == 200)
             {
                 var results = response.Success ?? [];
-
+        
                 var sampleNumbers = results
-                    .Select(item => item.Sample)
-                    .Where(sample => sample?.Number != null)
+                    .Where(sample => !string.IsNullOrEmpty(sample.Sample?.ControlNumber))
                     .Select(sample => new SampleNumber
                     {
-                        Id = sample!.Number,
-                        Identification = sample.Number.ToString()
+                        Id = sample.Id,
+                        Identification = sample.Sample?.ControlNumber
                     })
-                    .DistinctBy(sn => sn.Id)
-                    .Where(sn => sn.Id.ToString()!.Contains(numberSearch ?? ""))
-                    .OrderBy(sn => sn.Id)
+                    .DistinctBy(sample => sample.Identification)
+                    .Where(sample => string.IsNullOrEmpty(numberSearch) || 
+                                     (sample.Identification != null && 
+                                      sample.Identification.Contains(numberSearch, StringComparison.OrdinalIgnoreCase)))
+                    .OrderBy(sample => sample.Identification)
                     .ToList();
-
-                return StatusCode(response.StatusCode, new ResponseBase<List<SampleNumber>>
+        
+                return Ok(new ResponseBase<List<SampleNumber>>
                 {
-                    Ok = response.Success != null,
+                    Ok = true,
                     Data = sampleNumbers
                 });
             }
@@ -275,6 +276,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+
 
         [HttpGet("GetAvailableCollectionPoints")]
         public async Task<ActionResult<ResponseBase<List<CollectionPoint>>>> GetAvailableCollectionPoints([FromQuery] string? pointSearch)
@@ -420,7 +423,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] string[] customValues,
-            [FromQuery] int[] sampleNumbers,
+            [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
@@ -494,7 +497,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                                 
                 if(!sampleNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
                 }
 
                 if(!collectionPoints.IsNullOrEmpty()) {
@@ -594,7 +597,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] string[] customValues,
-            [FromQuery] int[] sampleNumbers,
+            [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
@@ -673,7 +676,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
                     if(!sampleNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
                     }
 
                     if(!collectionPoints.IsNullOrEmpty()) {
@@ -821,7 +824,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] string[] customValues,
-            [FromQuery] int[] sampleNumbers,
+            [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
@@ -885,7 +888,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 
                 if(!sampleNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
                 }
 
                 if(!batchNumbers.IsNullOrEmpty()) {
