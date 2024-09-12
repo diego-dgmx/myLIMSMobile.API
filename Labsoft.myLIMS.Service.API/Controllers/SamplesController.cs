@@ -1051,5 +1051,35 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpGet("GetAvailableQCTestsByRoutineBatchId")]
+        public async Task<ActionResult<ResponseBase<List<QCTest>>>> GetAvailableQCTestsByRoutineBatchId(int routineBatchId)
+        {
+            var response = await _samplesServices.GetAvailableQCTestsByRoutineBatchId(routineBatchId);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<QCTest>>
+                {
+                    Ok = response.Success != null,
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }
