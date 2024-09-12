@@ -1,3 +1,5 @@
+using LabsoftAPI;
+
 namespace Entities
 {
     public class SampleDTO {
@@ -6,6 +8,7 @@ namespace Entities
         public DateTime? Conclusion { get; set; }
         public DateTime? TakenDateTime { get; set; }
         public DateTime? ReceivedTime { get; set; }
+        public List<QCTests>? QCTests { get; set; }
         public CurrentStatus? CurrentStatus { get; set; }
         public SampleServiceArea? ServiceArea { get; set; }
         public SampleType? SampleType { get; set; }
@@ -47,6 +50,7 @@ namespace Entities
         public int? MasterId { get; set; }
         public int? Id { get; set; }
         public string? Identification { get; set; }
+        public List<int>? QCRoutineBatchIds { get; set; }
     }
 
     public class BatchQC

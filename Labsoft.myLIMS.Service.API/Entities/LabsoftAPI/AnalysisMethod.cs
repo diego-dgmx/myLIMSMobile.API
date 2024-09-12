@@ -26,7 +26,7 @@ namespace LabsoftAPI {
         public int? MasterId { get; set; }
         public int? Version { get; set; }
         public bool? LastVersion { get; set; }
-        public object? QCRoutineBatchIds { get; set; }
+        public List<int>? QCRoutineBatchIds { get; set; }
         public bool? Active { get; set; }
         public object? Duration { get; set; }
         public bool? AvailableSchedule { get; set; }

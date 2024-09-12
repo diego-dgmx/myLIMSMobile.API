@@ -734,6 +734,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         Conclusion = item.Sample?.Conclusion,
                         TakenDateTime = item.Sample?.TakenDateTime,
                         ReceivedTime = item.Sample?.ReceivedTime,
+                        QCTests = item.QCTests,
                         CurrentStatus = new Entities.CurrentStatus
                         {
                             Id = item.Sample?.CurrentStatus?.Id,
@@ -763,7 +764,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         {
                             MasterId = item.Method?.MasterId,
                             Id = item.Method?.Id,
-                            Identification = item.Method?.Identification
+                            Identification = item.Method?.Identification,
+                            QCRoutineBatchIds = item.Method?.QCRoutineBatchIds
                         }
                     }).ToList();
 
