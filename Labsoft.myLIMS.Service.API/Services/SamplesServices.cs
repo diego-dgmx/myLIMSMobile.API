@@ -59,6 +59,67 @@ namespace Services {
             return result;
         }
 
+        public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableQCTestsByRoutineBatchId(int routineBatchId)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+            var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/QCTests/GetAvailableByQCRoutineBatchId");
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["qCRoutineBatchId"] = routineBatchId.ToString();
+
+            uriBuilder.Query = query.ToString();
+
+            var response = await _httpClient.GetAsync(uriBuilder.ToString());
+
+            var json = await response.Content.ReadAsStringAsync();
+
+            // Para depuración
+            Console.WriteLine(json);
+
+            ExternalResponse<List<QCTest>, ErrorResponse> result;
+
+            try
+            {
+                if (response.IsSuccessStatusCode)
+                {
+                    var qctests = JsonConvert.DeserializeObject<List<QCTest>>(json);
+
+                    result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                    {
+                        StatusCode = (int)response.StatusCode,
+                        Success = qctests 
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                    {
+                        StatusCode = (int)response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                {
+                    Error = new ErrorResponse
+                    {
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+
         public async Task<ExternalResponse<List<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);

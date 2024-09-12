@@ -74,6 +74,15 @@ namespace LabsoftAPI {
         public string? Identification { get; set; }
     }
 
+    public class QCRoutine
+    {
+        public int Id { get; set; }
+        public string? Identification { get; set; }
+        public bool UnrestrictedAccessServiceArea { get; set; }
+        public bool UnrestrictedAccessServiceCenter { get; set; }
+        public bool Active { get; set; }
+    }
+
     public class QCTests
     {
         public int? Id { get; set; }
@@ -87,13 +96,13 @@ namespace LabsoftAPI {
         public int? Number { get; set; }
         public int? Year { get; set; }
         public string? ControlNumber { get; set; }
-        public object? TaskCountLimit { get; set; }
-        public object? TaskCount { get; set; }
+        public int? TaskCountLimit { get; set; }
+        public int? TaskCount { get; set; }
         public int? QCRoutineBatchId { get; set; }
         public object? QCRoutineBatch { get; set; }
         public object? Equipment { get; set; }
-        public object? Started { get; set; }
-        public object? Expires { get; set; }
+        public DateTime? Started { get; set; }
+        public DateTime? Expires { get; set; }
         public bool? AllRequiredControlSamplesPublished { get; set; }
     }
 
