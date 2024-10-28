@@ -22,6 +22,24 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             prepareAnalysis = 4
         }
 
+        private enum SampleSortParam
+        {
+            batchQC,
+            id,
+            analyticsMethod,
+            sampleType,
+            stage,
+            serviceArea,
+            startUser,
+            date,
+            sampleNumber,
+            sampleIdentification,
+            customInfo,
+            activities,
+            collectionPoint,
+            sampleReason
+        }
+
         [HttpGet("GetAllMethods")]
         public async Task<ActionResult<ResponseBase<List<AnalysisMethod>>>> GetAllMethods()
         {
@@ -276,8 +294,6 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
-
-
 
         [HttpGet("GetAvailableCollectionPoints")]
         public async Task<ActionResult<ResponseBase<List<CollectionPoint>>>> GetAvailableCollectionPoints([FromQuery] string? pointSearch)
@@ -588,6 +604,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("GetSamples")]
         public async Task<ActionResult<ResponseBase<Pagination<SampleDTO>>>> GetSamples(
             [FromQuery] string? sampleType,
+            [FromQuery] string? sortParam,
             [FromQuery] int[] sampleIds,
             [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
@@ -624,6 +641,53 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(response.StatusCode == 200)
                 {
                     var results = response.Success ?? [];
+
+                    if (Enum.TryParse<SampleSortParam>(sortParam, out var param)) {
+                        switch(param) {
+                            case SampleSortParam.batchQC:
+                                results = [.. results.OrderBy(r => r.Sample?.Id)];
+                                break;
+                            case SampleSortParam.id:
+                                results = [.. results.OrderBy(r => r.Sample?.Id)];
+                                break;
+                            case SampleSortParam.analyticsMethod:
+                                results = [.. results.OrderBy(r => r.Method?.MasterId)];
+                                break;
+                            case SampleSortParam.sampleType:
+                                results = [.. results.OrderBy(r => r.Sample?.SampleType?.Id)];
+                                break;
+                            case SampleSortParam.stage:
+                                results = [.. results.OrderBy(r => r.CurrentStatus?.MethodStatus?.Id)];
+                                break;
+                            case SampleSortParam.serviceArea:
+                                results = [.. results.OrderBy(r => r.ServiceArea?.Id)];
+                                break;
+                            case SampleSortParam.startUser:
+                                results = [.. results.OrderBy(r => r.CurrentStatus?.StartUser?.Id)];
+                                break;
+                            case SampleSortParam.date:
+                                results = [.. results.OrderBy(r => r.AnalysisDeadline)];
+                                break;
+                            case SampleSortParam.sampleNumber:
+                                results = [.. results.OrderBy(r => r.Sample?.ControlNumber)];
+                                break;
+                            case SampleSortParam.sampleIdentification:
+                                results = [.. results.OrderBy(r => r.Sample?.Identification)];
+                                break;
+                            case SampleSortParam.customInfo:
+                                results = [.. results.OrderBy(r => r.SampleCustomInfo?.DisplayValue)];
+                                break;
+                            case SampleSortParam.activities:
+                                results = [.. results.OrderBy(r => r.Sample?.Id)];
+                                break;
+                            case SampleSortParam.collectionPoint:
+                                results = [.. results.OrderBy(r => r.Sample?.CollectionPoint?.Id)];
+                                break;
+                            case SampleSortParam.sampleReason:
+                                results = [.. results.OrderBy(r => r.Sample?.SampleReason?.Id)];
+                                break;
+                        }
+                    }
 
                     if(!sampleIds.IsNullOrEmpty()) {
                         results = results.Where(item => sampleIds.ToList()

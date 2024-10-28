@@ -68,6 +68,7 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 // Add external services scopes
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<ISamplesServices, SamplesServices>();
+builder.Services.AddScoped<IQCTestsServices, QCTestsServices>();
 builder.Services.AddScoped<ISystemConfigsServices, SystemConfigsServices>();
 
 var app = builder.Build();
