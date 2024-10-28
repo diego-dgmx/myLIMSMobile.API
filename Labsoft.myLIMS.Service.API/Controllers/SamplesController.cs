@@ -22,6 +22,24 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             prepareAnalysis = 4
         }
 
+        private enum SampleSortParam
+        {
+            batchQC,
+            id,
+            analyticsMethod,
+            sampleType,
+            stage,
+            serviceArea,
+            startUser,
+            date,
+            sampleNumber,
+            sampleIdentification,
+            customInfo,
+            activities,
+            collectionPoint,
+            sampleReason
+        }
+
         [HttpGet("GetAllMethods")]
         public async Task<ActionResult<ResponseBase<List<AnalysisMethod>>>> GetAllMethods()
         {
@@ -234,30 +252,31 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetAvailableSampleNumbers")]
-        public async Task<ActionResult<ResponseBase<List<SampleNumber>>>> GetAvailableSampleNumbers([FromQuery] string? numberSearch)
+        public async Task<ActionResult<ResponseBase<List<SampleNumber>>>> GetAvailableControlNumbers([FromQuery] string? numberSearch)
         {
             var response = await _samplesServices.GetAllSamples();
-
+        
             if (response.StatusCode == 200)
             {
                 var results = response.Success ?? [];
-
+        
                 var sampleNumbers = results
-                    .Select(item => item.Sample)
-                    .Where(sample => sample?.Number != null)
+                    .Where(sample => !string.IsNullOrEmpty(sample.Sample?.ControlNumber))
                     .Select(sample => new SampleNumber
                     {
-                        Id = sample!.Number,
-                        Identification = sample.Number.ToString()
+                        Id = sample.Id,
+                        Identification = sample.Sample?.ControlNumber
                     })
-                    .DistinctBy(sn => sn.Id)
-                    .Where(sn => sn.Id.ToString()!.Contains(numberSearch ?? ""))
-                    .OrderBy(sn => sn.Id)
+                    .DistinctBy(sample => sample.Identification)
+                    .Where(sample => string.IsNullOrEmpty(numberSearch) || 
+                                     (sample.Identification != null && 
+                                      sample.Identification.Contains(numberSearch, StringComparison.OrdinalIgnoreCase)))
+                    .OrderBy(sample => sample.Identification)
                     .ToList();
-
-                return StatusCode(response.StatusCode, new ResponseBase<List<SampleNumber>>
+        
+                return Ok(new ResponseBase<List<SampleNumber>>
                 {
-                    Ok = response.Success != null,
+                    Ok = true,
                     Data = sampleNumbers
                 });
             }
@@ -420,7 +439,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] string[] customValues,
-            [FromQuery] int[] sampleNumbers,
+            [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
@@ -494,7 +513,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                                 
                 if(!sampleNumbers.IsNullOrEmpty()) {
                     results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
                 }
 
                 if(!collectionPoints.IsNullOrEmpty()) {
@@ -585,6 +604,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("GetSamples")]
         public async Task<ActionResult<ResponseBase<Pagination<SampleDTO>>>> GetSamples(
             [FromQuery] string? sampleType,
+            [FromQuery] string? sortParam,
             [FromQuery] int[] sampleIds,
             [FromQuery] string[] sampleIdentifications,
             [FromQuery] int[] methodIds,
@@ -594,7 +614,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] string[] customValues,
-            [FromQuery] int[] sampleNumbers,
+            [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
@@ -621,6 +641,53 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(response.StatusCode == 200)
                 {
                     var results = response.Success ?? [];
+
+                    if (Enum.TryParse<SampleSortParam>(sortParam, out var param)) {
+                        switch(param) {
+                            case SampleSortParam.batchQC:
+                                results = [.. results.OrderBy(r => r.Sample?.Id)];
+                                break;
+                            case SampleSortParam.id:
+                                results = [.. results.OrderBy(r => r.Sample?.Id)];
+                                break;
+                            case SampleSortParam.analyticsMethod:
+                                results = [.. results.OrderBy(r => r.Method?.MasterId)];
+                                break;
+                            case SampleSortParam.sampleType:
+                                results = [.. results.OrderBy(r => r.Sample?.SampleType?.Id)];
+                                break;
+                            case SampleSortParam.stage:
+                                results = [.. results.OrderBy(r => r.CurrentStatus?.MethodStatus?.Id)];
+                                break;
+                            case SampleSortParam.serviceArea:
+                                results = [.. results.OrderBy(r => r.ServiceArea?.Id)];
+                                break;
+                            case SampleSortParam.startUser:
+                                results = [.. results.OrderBy(r => r.CurrentStatus?.StartUser?.Id)];
+                                break;
+                            case SampleSortParam.date:
+                                results = [.. results.OrderBy(r => r.AnalysisDeadline)];
+                                break;
+                            case SampleSortParam.sampleNumber:
+                                results = [.. results.OrderBy(r => r.Sample?.ControlNumber)];
+                                break;
+                            case SampleSortParam.sampleIdentification:
+                                results = [.. results.OrderBy(r => r.Sample?.Identification)];
+                                break;
+                            case SampleSortParam.customInfo:
+                                results = [.. results.OrderBy(r => r.SampleCustomInfo?.DisplayValue)];
+                                break;
+                            case SampleSortParam.activities:
+                                results = [.. results.OrderBy(r => r.Sample?.Id)];
+                                break;
+                            case SampleSortParam.collectionPoint:
+                                results = [.. results.OrderBy(r => r.Sample?.CollectionPoint?.Id)];
+                                break;
+                            case SampleSortParam.sampleReason:
+                                results = [.. results.OrderBy(r => r.Sample?.SampleReason?.Id)];
+                                break;
+                        }
+                    }
 
                     if(!sampleIds.IsNullOrEmpty()) {
                         results = results.Where(item => sampleIds.ToList()
@@ -673,7 +740,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
                     if(!sampleNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
                     }
 
                     if(!collectionPoints.IsNullOrEmpty()) {
@@ -734,6 +801,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         Conclusion = item.Sample?.Conclusion,
                         TakenDateTime = item.Sample?.TakenDateTime,
                         ReceivedTime = item.Sample?.ReceivedTime,
+                        QCTests = item.QCTests,
                         CurrentStatus = new Entities.CurrentStatus
                         {
                             Id = item.Sample?.CurrentStatus?.Id,
@@ -763,7 +831,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         {
                             MasterId = item.Method?.MasterId,
                             Id = item.Method?.Id,
-                            Identification = item.Method?.Identification
+                            Identification = item.Method?.Identification,
+                            QCRoutineBatchIds = item.Method?.QCRoutineBatchIds
                         }
                     }).ToList();
 
@@ -821,7 +890,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] startUserIds,
             [FromQuery] int[] batchNumbers,
             [FromQuery] string[] customValues,
-            [FromQuery] int[] sampleNumbers,
+            [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
@@ -885,7 +954,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 
                 if(!sampleNumbers.IsNullOrEmpty()) {
                         results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.Number ?? 0)).ToList();
+                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
                 }
 
                 if(!batchNumbers.IsNullOrEmpty()) {
@@ -1044,6 +1113,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     {
                         Code = "not_exists",
                         Description = "sample_not_exists"
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetAvailableQCTestsByRoutineBatchId")]
+        public async Task<ActionResult<ResponseBase<List<QCTest>>>> GetAvailableQCTestsByRoutineBatchId(int routineBatchId)
+        {
+            var response = await _samplesServices.GetAvailableQCTestsByRoutineBatchId(routineBatchId);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<QCTest>>
+                {
+                    Ok = response.Success != null,
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
                     }
                 });
             }

@@ -95,7 +95,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, identity),
+                new Claim("nested_jwt", identity),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
