@@ -110,6 +110,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("GetAvailableByQCRoutineBatchId")]
+        public async Task<ActionResult<ResponseBase<List<QCTest>>>> GetAvailableByQCRoutineBatchId([FromQuery] int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _qcTestsServices.GetAvailableByQCRoutineBatchId(id, identityCenterToken);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<QCTest>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+        
         [HttpGet("GetLinkedSamplesByQCTestId")]
         public async Task<ActionResult<ResponseBase<List<QCTestLink>>>> GetLinkedSamplesByQCTestId([FromQuery] int id)
         {

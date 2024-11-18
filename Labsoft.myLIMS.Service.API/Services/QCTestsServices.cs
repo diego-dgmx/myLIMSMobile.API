@@ -10,6 +10,60 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
+        public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableByQCRoutineBatchId(int id, string? identityCenterToken)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+            
+            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/QCTests/GetAvailableByQCRoutineBatchId");
+
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+            query["id"] = id.ToString();
+
+            uriBuilder.Query = query.ToString();
+
+            var response = await _httpClient.GetAsync(uriBuilder.ToString());
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<List<QCTest>>(json);
+
+            ExternalResponse<List<QCTest>, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
         public async Task<ExternalResponse<List<QCTestLink>, ErrorResponse>> GetControlSamplesByQCTestId(int id, string? identityCenterToken)
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);

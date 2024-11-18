@@ -531,37 +531,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                 }
 
-                if(validityStartDate != null && validityStartDate != null) {
+                if(validityStartDate != null) {
                     results = results.Where(
                         item => item.AnalysisDeadline >= validityStartDate &&
                         item.AnalysisDeadline <= validityEndDate).ToList();
                 }
 
-                if(executionStartDate != null && executionStartDate != null) {
+                if(executionStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
                         item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
                 }
 
-                if(conclusionStartDate != null && conclusionStartDate != null) {
+                if(conclusionStartDate != null) {
                     results = results.Where(
                         item => item.Conclusion >= conclusionStartDate &&
                         item.Conclusion <= conclusionEndDate).ToList();
                 }
 
-                if(receiptStartDate != null && receiptStartDate != null) {
+                if(receiptStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.ReceivedTime >= receiptStartDate &&
                         item.Sample.ReceivedTime <= receiptEndDate).ToList();
                 }
 
-                if(startStartDate != null && startStartDate != null) {
+                if(startStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.StartDateTime >= startStartDate &&
                         item.CurrentStatus.StartDateTime <= startEndDate).ToList();
                 }
 
-                if(collectStartDate != null && collectStartDate != null) {
+                if(collectStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.TakenDateTime >= collectStartDate &&
                         item.Sample.TakenDateTime <= collectEndDate).ToList();
@@ -758,37 +758,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                                 .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                     }
 
-                    if(validityStartDate != null && validityStartDate != null) {
+                    if(validityStartDate != null) {
                         results = results.Where(
                             item => item.AnalysisDeadline >= validityStartDate &&
                             item.AnalysisDeadline <= validityEndDate).ToList();
                     }
 
-                    if(executionStartDate != null && executionStartDate != null) {
+                    if(executionStartDate != null) {
                         results = results.Where(
                             item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
                             item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
                     }
 
-                    if(conclusionStartDate != null && conclusionStartDate != null) {
+                    if(conclusionStartDate != null) {
                         results = results.Where(
                             item => item.Conclusion >= conclusionStartDate &&
                             item.Conclusion <= conclusionEndDate).ToList();
                     }
 
-                    if(receiptStartDate != null && receiptStartDate != null) {
+                    if(receiptStartDate != null) {
                         results = results.Where(
                             item => item.Sample?.ReceivedTime >= receiptStartDate &&
                             item.Sample.ReceivedTime <= receiptEndDate).ToList();
                     }
 
-                    if(startStartDate != null && startStartDate != null) {
+                    if(startStartDate != null) {
                         results = results.Where(
                             item => item.CurrentStatus?.StartDateTime >= startStartDate &&
                             item.CurrentStatus.StartDateTime <= startEndDate).ToList();
                     }
 
-                    if(collectStartDate != null && collectStartDate != null) {
+                    if(collectStartDate != null) {
                         results = results.Where(
                             item => item.Sample?.TakenDateTime >= collectStartDate &&
                             item.Sample.TakenDateTime <= collectEndDate).ToList();
@@ -984,37 +984,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                 }
 
-                if(validityStartDate != null && validityStartDate != null) {
+                if(validityStartDate != null) {
                     results = results.Where(
                         item => item.AnalysisDeadline >= validityStartDate &&
                         item.AnalysisDeadline <= validityEndDate).ToList();
                 }
 
-                if(executionStartDate != null && executionStartDate != null) {
+                if(executionStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
                         item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
                 }
 
-                if(conclusionStartDate != null && conclusionStartDate != null) {
+                if(conclusionStartDate != null) {
                     results = results.Where(
                         item => item.Conclusion >= conclusionStartDate &&
                         item.Conclusion <= conclusionEndDate).ToList();
                 }
 
-                if(receiptStartDate != null && receiptStartDate != null) {
+                if(receiptStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.ReceivedTime >= receiptStartDate &&
                         item.Sample.ReceivedTime <= receiptEndDate).ToList();
                 }
 
-                if(startStartDate != null && startStartDate != null) {
+                if(startStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.StartDateTime >= startStartDate &&
                         item.CurrentStatus.StartDateTime <= startEndDate).ToList();
                 }
 
-                if(collectStartDate != null && collectStartDate != null) {
+                if(collectStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.TakenDateTime >= collectStartDate &&
                         item.Sample.TakenDateTime <= collectEndDate).ToList();
