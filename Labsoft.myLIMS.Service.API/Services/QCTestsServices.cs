@@ -1,3 +1,4 @@
+using System.Text;
 using System.Web;
 using Entities;
 using LabsoftAPI;
@@ -9,6 +10,112 @@ namespace Services {
     {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
+
+        public async Task<ExternalResponse<List<int>, ErrorResponse>> AttachSampleMethodsToQCTest(AttachSampleMethodsToQCTestDTO body)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+            
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(
+                $"{_settings.MyLIMSApiURLBase}/QCTests/AttachSampleMethodsToQCTest", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<List<int>>(json);
+
+            ExternalResponse<List<int>, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<List<int>, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<int>, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<List<int>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<int, ErrorResponse>> CreateNewQCTest(CreateNewQCTestDTO body)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+            
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(
+                $"{_settings.MyLIMSApiURLBase}/QCTests/CreateNewQCTest", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<int>(json);
+
+            ExternalResponse<int, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<int, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
 
         public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableByQCRoutineBatchId(int id, string? identityCenterToken)
         {

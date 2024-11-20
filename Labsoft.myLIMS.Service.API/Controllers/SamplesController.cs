@@ -796,7 +796,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     
                     var samples = results.Select(item => new SampleDTO
                     {
-                        Id = item.Sample?.Id,
+                        Id = item.Id,
                         Identification = item.Sample?.Identification,
                         Conclusion = item.Sample?.Conclusion,
                         TakenDateTime = item.Sample?.TakenDateTime,

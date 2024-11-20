@@ -139,6 +139,64 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpPost("AttachSampleMethodsToQCTest")]
+        public async Task<ActionResult<ResponseBase<List<int>>>> AttachSampleMethodsToQCTest([FromBody] AttachSampleMethodsToQCTestDTO body)
+        {
+            var response = await _qcTestsServices.AttachSampleMethodsToQCTest(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<int>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("CreateNewQCTest")]
+        public async Task<ActionResult<ResponseBase<int>>> CreateNewQCTest([FromBody] CreateNewQCTestDTO body)
+        {
+            var response = await _qcTestsServices.CreateNewQCTest(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<int>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
         
         [HttpGet("GetLinkedSamplesByQCTestId")]
         public async Task<ActionResult<ResponseBase<List<QCTestLink>>>> GetLinkedSamplesByQCTestId([FromQuery] int id)
