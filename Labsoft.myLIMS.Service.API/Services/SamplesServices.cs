@@ -245,5 +245,56 @@ namespace Services {
 
             return myLIMSResponse?.TotalCount ?? 0;
         }
+
+        public async Task<ExternalResponse<List<TaskForPerform>, ErrorResponse>> GetForPerformTask(int[] sampleMethodIds)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+            var queryParams = sampleMethodIds
+                .Select((value, index) => $"sampleMethodIds[{index}]={value}")
+                .ToArray();
+
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/Samples/Methods/GetForPerformTask?{string.Join("&", queryParams)}");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<List<TaskForPerform>>(json);
+
+            ExternalResponse<List<TaskForPerform>, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<List<TaskForPerform>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<TaskForPerform>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<List<TaskForPerform>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
     }
 }
