@@ -68,6 +68,8 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<ISamplesServices, SamplesServices>();
 builder.Services.AddScoped<IMethodsServices, MethodsServices>();
+builder.Services.AddScoped<IConsumablesServices, ConsumablesServices>();
+builder.Services.AddScoped<IEquipmentsServices, EquipmentsServices>();
 builder.Services.AddScoped<IQCTestsServices, QCTestsServices>();
 builder.Services.AddScoped<ISystemConfigsServices, SystemConfigsServices>();
 
