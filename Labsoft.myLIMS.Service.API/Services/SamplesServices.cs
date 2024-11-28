@@ -128,6 +128,7 @@ namespace Services {
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["$top"] = (await TotalCountSamples()).ToString();
             query["$inlinecount"] = "allpages";
+            query["$filter"] = "Sample/Received eq true and Sample/Finalized eq false";
             if(sampleType != null)
             {
                 query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
@@ -231,6 +232,7 @@ namespace Services {
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["$top"] = "0";
             query["$inlinecount"] = "allpages";
+            query["$filter"] = "Sample/Received eq true and Sample/Finalized eq false";
             if(sampleType != null)
             {
                 query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";

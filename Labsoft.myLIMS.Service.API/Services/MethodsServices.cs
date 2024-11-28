@@ -11,6 +11,53 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
+        public async Task<ExternalResponse<string, ErrorResponse>> AnalysisMethodInstruction(int methodId)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/Methods/{methodId}/Instruction");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+
+            ExternalResponse<string, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<string, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
         public async Task<ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>> MethodPrerequisiteAnalysis(int methodId)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
