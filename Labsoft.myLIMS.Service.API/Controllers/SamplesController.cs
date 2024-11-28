@@ -142,7 +142,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
         
         [HttpGet("GetAvailableSampleTypes")]
-        public async Task<ActionResult<ResponseBase<List<Entities.SampleType>>>> GetAvailableSampleTypes()
+        public async Task<ActionResult<ResponseBase<List<LabsoftAPI.SampleType>>>> GetAvailableSampleTypes()
         {
             var response = await _samplesServices.GetAllSamples();
             
@@ -150,12 +150,12 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             {
                 var results = response.Success ?? [];
 
-                return StatusCode(response.StatusCode, new ResponseBase<List<Entities.SampleType>>
+                return StatusCode(response.StatusCode, new ResponseBase<List<LabsoftAPI.SampleType>>
                 {
                     Ok = response.Success != null,
                     Data = [.. results.Select(sample => sample.Sample!.SampleType)
                         .DistinctBy(m => m!.Id)
-                        .Select(sampleType => new Entities.SampleType
+                        .Select(sampleType => new LabsoftAPI.SampleType
                         {
                             Id = sampleType!.Id,
                             Identification = sampleType.Identification
@@ -339,7 +339,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpGet("GetAvailableSampleReasons")]
-        public async Task<ActionResult<ResponseBase<List<Entities.SampleReason>>>> GetAvailableSampleReasons([FromQuery] string? reasonSearch)
+        public async Task<ActionResult<ResponseBase<List<SampleReason>>>> GetAvailableSampleReasons([FromQuery] string? reasonSearch)
         {
             // Assuming _samplesServices is a service that interacts with the data layer
             var response = await _samplesServices.GetAllSamples();
@@ -352,7 +352,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     .Select(item => item.Sample?.SampleReason)
                     .Where(reason => reason != null)
                     .DistinctBy(reason => new { reason?.Id, })
-                    .Select(reason => new Entities.SampleReason
+                    .Select(reason => new SampleReason
                     {
                         Id = reason?.Id,
                         Identification = reason?.Identification
@@ -361,7 +361,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     .OrderBy(sr => sr.Id)
                     .ToList();
 
-                return Ok(new ResponseBase<List<Entities.SampleReason>>
+                return Ok(new ResponseBase<List<SampleReason>>
                 {
                     Ok = true,
                     Data = sampleReasons
@@ -426,6 +426,34 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
 
+        }
+
+        [HttpGet("GetForPerformTask")]
+        public async Task<ActionResult<ResponseBase<TaskForPerform>>> GetForPerformTask([FromQuery] int[] sampleMethodIds) {
+            var response = await _samplesServices.GetForPerformTask(sampleMethodIds);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<TaskForPerform>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
         }
 
         [HttpGet("GetSamplesSummary")]
@@ -531,37 +559,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                 }
 
-                if(validityStartDate != null && validityStartDate != null) {
+                if(validityStartDate != null) {
                     results = results.Where(
                         item => item.AnalysisDeadline >= validityStartDate &&
                         item.AnalysisDeadline <= validityEndDate).ToList();
                 }
 
-                if(executionStartDate != null && executionStartDate != null) {
+                if(executionStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
                         item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
                 }
 
-                if(conclusionStartDate != null && conclusionStartDate != null) {
+                if(conclusionStartDate != null) {
                     results = results.Where(
                         item => item.Conclusion >= conclusionStartDate &&
                         item.Conclusion <= conclusionEndDate).ToList();
                 }
 
-                if(receiptStartDate != null && receiptStartDate != null) {
+                if(receiptStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.ReceivedTime >= receiptStartDate &&
                         item.Sample.ReceivedTime <= receiptEndDate).ToList();
                 }
 
-                if(startStartDate != null && startStartDate != null) {
+                if(startStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.StartDateTime >= startStartDate &&
                         item.CurrentStatus.StartDateTime <= startEndDate).ToList();
                 }
 
-                if(collectStartDate != null && collectStartDate != null) {
+                if(collectStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.TakenDateTime >= collectStartDate &&
                         item.Sample.TakenDateTime <= collectEndDate).ToList();
@@ -758,37 +786,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                                 .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                     }
 
-                    if(validityStartDate != null && validityStartDate != null) {
+                    if(validityStartDate != null) {
                         results = results.Where(
                             item => item.AnalysisDeadline >= validityStartDate &&
                             item.AnalysisDeadline <= validityEndDate).ToList();
                     }
 
-                    if(executionStartDate != null && executionStartDate != null) {
+                    if(executionStartDate != null) {
                         results = results.Where(
                             item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
                             item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
                     }
 
-                    if(conclusionStartDate != null && conclusionStartDate != null) {
+                    if(conclusionStartDate != null) {
                         results = results.Where(
                             item => item.Conclusion >= conclusionStartDate &&
                             item.Conclusion <= conclusionEndDate).ToList();
                     }
 
-                    if(receiptStartDate != null && receiptStartDate != null) {
+                    if(receiptStartDate != null) {
                         results = results.Where(
                             item => item.Sample?.ReceivedTime >= receiptStartDate &&
                             item.Sample.ReceivedTime <= receiptEndDate).ToList();
                     }
 
-                    if(startStartDate != null && startStartDate != null) {
+                    if(startStartDate != null) {
                         results = results.Where(
                             item => item.CurrentStatus?.StartDateTime >= startStartDate &&
                             item.CurrentStatus.StartDateTime <= startEndDate).ToList();
                     }
 
-                    if(collectStartDate != null && collectStartDate != null) {
+                    if(collectStartDate != null) {
                         results = results.Where(
                             item => item.Sample?.TakenDateTime >= collectStartDate &&
                             item.Sample.TakenDateTime <= collectEndDate).ToList();
@@ -797,15 +825,16 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     var samples = results.Select(item => new SampleDTO
                     {
                         Id = item.Sample?.Id,
+                        SampleMethodId = item.Id,
                         Identification = item.Sample?.Identification,
                         Conclusion = item.Sample?.Conclusion,
                         TakenDateTime = item.Sample?.TakenDateTime,
                         ReceivedTime = item.Sample?.ReceivedTime,
                         QCTests = item.QCTests,
-                        CurrentStatus = new Entities.CurrentStatus
+                        CurrentStatus = new CurrentStatus
                         {
                             Id = item.Sample?.CurrentStatus?.Id,
-                            SampleStatus = new Entities.SampleStatus
+                            SampleStatus = new SampleStatus
                             {
                                 Id = item.Sample?.CurrentStatus?.SampleStatus?.Id,
                                 Identification = item.Sample?.CurrentStatus?.SampleStatus?.Identification,
@@ -822,7 +851,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             Id = item.ServiceArea?.Id,
                             Identification = item.ServiceArea?.Identification
                         },
-                        SampleType = new Entities.SampleType
+                        SampleType = new LabsoftAPI.SampleType
                         {
                             Id = item.Sample?.SampleType?.Id,
                             Identification = item.Sample?.SampleType?.Identification
@@ -984,37 +1013,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
                 }
 
-                if(validityStartDate != null && validityStartDate != null) {
+                if(validityStartDate != null) {
                     results = results.Where(
                         item => item.AnalysisDeadline >= validityStartDate &&
                         item.AnalysisDeadline <= validityEndDate).ToList();
                 }
 
-                if(executionStartDate != null && executionStartDate != null) {
+                if(executionStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
                         item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
                 }
 
-                if(conclusionStartDate != null && conclusionStartDate != null) {
+                if(conclusionStartDate != null) {
                     results = results.Where(
                         item => item.Conclusion >= conclusionStartDate &&
                         item.Conclusion <= conclusionEndDate).ToList();
                 }
 
-                if(receiptStartDate != null && receiptStartDate != null) {
+                if(receiptStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.ReceivedTime >= receiptStartDate &&
                         item.Sample.ReceivedTime <= receiptEndDate).ToList();
                 }
 
-                if(startStartDate != null && startStartDate != null) {
+                if(startStartDate != null) {
                     results = results.Where(
                         item => item.CurrentStatus?.StartDateTime >= startStartDate &&
                         item.CurrentStatus.StartDateTime <= startEndDate).ToList();
                 }
 
-                if(collectStartDate != null && collectStartDate != null) {
+                if(collectStartDate != null) {
                     results = results.Where(
                         item => item.Sample?.TakenDateTime >= collectStartDate &&
                         item.Sample.TakenDateTime <= collectEndDate).ToList();
@@ -1069,10 +1098,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         Conclusion = response.Success?.Sample?.Conclusion,
                         TakenDateTime = response.Success?.Sample?.TakenDateTime,
                         ReceivedTime = response.Success?.Sample?.ReceivedTime,
-                        CurrentStatus = new Entities.CurrentStatus
+                        CurrentStatus = new CurrentStatus
                         {
                             Id = response.Success?.Sample?.CurrentStatus?.Id,
-                            SampleStatus = new Entities.SampleStatus
+                            SampleStatus = new SampleStatus
                             {
                                 Id = response.Success?.Sample?.CurrentStatus?.SampleStatus?.Id,
                                 Identification = response.Success?.Sample?.CurrentStatus?.SampleStatus?.Identification,
@@ -1089,7 +1118,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                             Id = response.Success?.ServiceArea?.Id,
                             Identification = response.Success?.ServiceArea?.Identification
                         },
-                        SampleType = new Entities.SampleType
+                        SampleType = new LabsoftAPI.SampleType
                         {
                             Id = response.Success?.Sample?.SampleType?.Id,
                             Identification = response.Success?.Sample?.SampleType?.Identification

@@ -4,6 +4,7 @@ namespace Entities
 {
     public class SampleDTO {
         public int? Id { get; set; }
+        public int? SampleMethodId { get; set; }
         public string? Identification { get; set; }
         public DateTime? Conclusion { get; set; }
         public DateTime? TakenDateTime { get; set; }
@@ -15,21 +16,6 @@ namespace Entities
         public Method? Method { get; set; }
     }
 
-    public class CurrentStatus
-    {
-        public int? Id { get; set; }
-        public SampleStatus? SampleStatus { get; set; }
-    }
-
-    public class SampleStatus
-    {
-        public int? Id { get; set; }
-        public string? Identification { get; set; }
-        public bool? BeforeReceive { get; set; }
-        public bool? AfterPublish { get; set; }
-        public bool? PortalSampleStatus { get; set; }
-    }
-
     public class SampleServiceArea
     {
         public object? ExtraTime { get; set; }
@@ -37,20 +23,6 @@ namespace Entities
         public bool? Active { get; set; }
         public int? Id { get; set; }
         public string? Identification { get; set; }
-    }
-
-    public class SampleType
-    {
-        public int? Id { get; set; }
-        public string? Identification { get; set; }
-    }
-
-    public class Method
-    {
-        public int? MasterId { get; set; }
-        public int? Id { get; set; }
-        public string? Identification { get; set; }
-        public List<int>? QCRoutineBatchIds { get; set; }
     }
 
     public class BatchQC
@@ -65,11 +37,6 @@ namespace Entities
     }
 
     public class CollectionPoint {
-        public int? Id { get; set; }
-        public string? Identification { get; set; }
-    }
-
-    public class SampleReason{
         public int? Id { get; set; }
         public string? Identification { get; set; }
     }

@@ -19,43 +19,11 @@ namespace LabsoftAPI.Auth
         public string? Identification { get; set; }
     }
 
-    public class Account
-    {
-        public object? Complement { get; set; }
-        public object? ReferenceKey { get; set; }
-        public object? AccountType { get; set; }
-        public object? PriceList { get; set; }
-        public bool Active { get; set; }
-        public bool RelatedAccountRequired { get; set; }
-        public object? RegistryNumber { get; set; }
-        public object? CultureId { get; set; }
-        public int Id { get; set; }
-        public string? Identification { get; set; }
-    }
-
     public class LicenseGroup
     {
         public int Id { get; set; }
         public string? Identification { get; set; }
         public int UserReadOnlyAccessCount { get; set; }
         public int UserEditableAccessCount { get; set; }
-    }
-
-    public class ServiceArea
-    {
-        public ServiceCenter? ServiceCenter { get; set; }
-        public object? ExtraTime { get; set; }
-        public bool ExternalServiceArea { get; set; }
-        public bool Active { get; set; }
-        public int Id { get; set; }
-        public string? Identification { get; set; }
-    }
-
-    public class ServiceCenter
-    {
-        public bool Active { get; set; }
-        public object? PriceList { get; set; }
-        public int Id { get; set; }
-        public string? Identification { get; set; }
     }
 }
