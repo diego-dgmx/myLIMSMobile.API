@@ -131,7 +131,7 @@ namespace Services {
             query["$filter"] = "Sample/Received eq true and Sample/Finalized eq false";
             if(sampleType != null)
             {
-                query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                query["$filter"] += $" and CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
             }
 
             uriBuilder.Query = query.ToString();
@@ -235,7 +235,7 @@ namespace Services {
             query["$filter"] = "Sample/Received eq true and Sample/Finalized eq false";
             if(sampleType != null)
             {
-                query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                query["$filter"] += $" and CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
             }
 
             uriBuilder.Query = query.ToString();

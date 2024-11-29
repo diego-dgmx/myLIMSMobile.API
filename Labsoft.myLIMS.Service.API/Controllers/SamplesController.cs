@@ -871,8 +871,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         {
                             CurrentPage = page,
                             PerPage = perPage,
-                            TotalPages = (int) Math.Ceiling((double) samples.Count / perPage),
-                            TotalItems = samples.Count,
+                            TotalPages = (int) Math.Ceiling((double) results.Count / perPage),
+                            TotalItems = results.Count,
                             Items = samples.Skip((page - 1) * perPage)
                                 .Take(perPage).ToList()
                         }
