@@ -8,5 +8,6 @@ namespace Services {
         Task<ExternalResponse<AnalysisSample, ErrorResponse>> ValidateSampleCode(int barCode);
         Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableQCTestsByRoutineBatchId(int routineBatchId);
         Task<ExternalResponse<List<TaskForPerform>, ErrorResponse>> GetForPerformTask(int[] sampleMethodIds);
+        Task<ExternalResponse<string, ErrorResponse>> PerformTask(bool calculate, PerformTaskDTO body);
     }
 }
