@@ -15,7 +15,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
 
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/Methods/{methodId}/Instruction");
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Methods/{methodId}/Instruction");
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
@@ -62,7 +62,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
 
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/Methods/{methodId}/MethodPrerequisiteAnalysis");
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Methods/{methodId}/MethodPrerequisiteAnalysis");
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MethodPrerequisiteAnalysisBasic>>(json);

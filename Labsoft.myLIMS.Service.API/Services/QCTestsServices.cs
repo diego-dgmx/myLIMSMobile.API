@@ -21,7 +21,7 @@ namespace Services {
             );
 
             var response = await _httpClient.PostAsync(
-                $"{_settings.MyLIMSApiURLBase}/QCTests/AttachSampleMethodsToQCTest", content);
+                $"{_settings.MyLIMSApiURLBase}/v2/QCTests/AttachSampleMethodsToQCTest", content);
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<List<int>>(json);
@@ -74,7 +74,7 @@ namespace Services {
             );
 
             var response = await _httpClient.PostAsync(
-                $"{_settings.MyLIMSApiURLBase}/QCTests/CreateNewQCTest", content);
+                $"{_settings.MyLIMSApiURLBase}/v2/QCTests/CreateNewQCTest", content);
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<int>(json);
@@ -121,7 +121,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
             
-            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/QCTests/GetAvailableByQCRoutineBatchId");
+            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests/GetAvailableByQCRoutineBatchId");
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["id"] = id.ToString();
@@ -175,7 +175,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
             
-            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/QCTests/GetControlSamplesByQCTestId");
+            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests/GetControlSamplesByQCTestId");
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["id"] = id.ToString();
@@ -229,7 +229,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
             
-            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/QCTests/GetLinkedSamplesByQCTestId");
+            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests/GetLinkedSamplesByQCTestId");
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["id"] = id.ToString();
@@ -283,7 +283,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
             
-            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/QCTests");
+            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests");
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["$top"] = (await TotalCountQCTests()).ToString();
@@ -334,7 +334,7 @@ namespace Services {
         }
 
         private async Task<int> TotalCountQCTests() {
-            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/QCTests");
+            var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests");
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["$top"] = "0";
