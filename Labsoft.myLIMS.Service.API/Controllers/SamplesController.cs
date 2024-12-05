@@ -1205,5 +1205,34 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpPost("AdvanceStep")]
+        public async Task<ActionResult<ResponseBase<string>>> AdvanceStep([FromBody] PerformTaskBackgroundParamsDTO body)
+        {
+            var response = await _samplesServices.AdvanceStep(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }

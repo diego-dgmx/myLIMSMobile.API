@@ -352,5 +352,58 @@ namespace Services {
 
             return result;
         }
+
+        public async Task<ExternalResponse<string, ErrorResponse>> AdvanceStep(PerformTaskBackgroundParamsDTO body)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync(
+                $"{_settings.MyLIMSApiURLBase}/v2/SampleMethods/AdvanceStep", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+
+            ExternalResponse<string, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<string, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
     }
 }
