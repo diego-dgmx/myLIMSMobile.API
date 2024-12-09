@@ -13,7 +13,7 @@ namespace Services {
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
             var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/SystemConfigs/GetSampleListInfo");
+                $"{_settings.MyLIMSApiURLBase}/v2/SystemConfigs/GetSampleListInfo");
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<SampleListInfo>(json);

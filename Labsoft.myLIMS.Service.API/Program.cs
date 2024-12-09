@@ -71,6 +71,8 @@ builder.Services.AddScoped<IMethodsServices, MethodsServices>();
 builder.Services.AddScoped<IConsumablesServices, ConsumablesServices>();
 builder.Services.AddScoped<IEquipmentsServices, EquipmentsServices>();
 builder.Services.AddScoped<IQCTestsServices, QCTestsServices>();
+builder.Services.AddScoped<IMessagesServices, MessagesServices>();
+builder.Services.AddScoped<IMeasurementUnitsServices, MeasurementUnitsServices>();
 builder.Services.AddScoped<ISystemConfigsServices, SystemConfigsServices>();
 
 var app = builder.Build();

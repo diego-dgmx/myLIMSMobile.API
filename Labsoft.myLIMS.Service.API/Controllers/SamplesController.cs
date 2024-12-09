@@ -871,8 +871,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         {
                             CurrentPage = page,
                             PerPage = perPage,
-                            TotalPages = (int) Math.Ceiling((double) samples.Count / perPage),
-                            TotalItems = samples.Count,
+                            TotalPages = (int) Math.Ceiling((double) results.Count / perPage),
+                            TotalItems = results.Count,
                             Items = samples.Skip((page - 1) * perPage)
                                 .Take(perPage).ToList()
                         }
@@ -1159,6 +1159,64 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 return StatusCode(response.StatusCode, new ResponseBase<List<QCTest>>
                 {
                     Ok = response.Success != null,
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("PerformTask")]
+        public async Task<ActionResult<ResponseBase<string>>> PerformTask([FromQuery] bool calculate, [FromBody] PerformTaskDTO body)
+        {
+            var response = await _samplesServices.PerformTask(calculate, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("AdvanceStep")]
+        public async Task<ActionResult<ResponseBase<string>>> AdvanceStep([FromBody] PerformTaskBackgroundParamsDTO body)
+        {
+            var response = await _samplesServices.AdvanceStep(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
                     Data = results
                 });
             }

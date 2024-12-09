@@ -10,22 +10,22 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class MethodsController(IMethodsServices methodsServices) : ControllerBase
+    public class MessagesController(IMessagesServices messagesServices) : ControllerBase
     {
-        private readonly IMethodsServices _methodsServices = methodsServices;
+        private readonly IMessagesServices _messagesServices = messagesServices;
 
-        [HttpGet("{methodId}/AnalysisMethodInstruction")]
-        public async Task<ActionResult<ResponseBase<string>>> AnalysisMethodInstruction(int methodId)
+        [HttpGet("{sampleId}/BySampleId")]
+        public async Task<ActionResult<ResponseBase<List<MessageBasic>>>> BySampleId(int sampleId)
         {
-            var response = await _methodsServices.AnalysisMethodInstruction(methodId);
+            var response = await _messagesServices.GetMessagesBySampleId(sampleId);
             
             if(response.StatusCode == 200)
             {
-                var result = response.Success;
+                var results = response.Success ?? [];
 
-                return StatusCode(response.StatusCode, new ResponseBase<string>
+                return StatusCode(response.StatusCode, new ResponseBase<List<MessageBasic>>
                 {
-                    Data = result
+                    Data = results
                 });
             }
             else
@@ -43,16 +43,16 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpGet("{methodId}/MethodPrerequisiteAnalysis")]
-        public async Task<ActionResult<ResponseBase<List<MethodPrerequisiteAnalysisBasic>>>> MethodPrerequisiteAnalysis(int methodId)
+        [HttpGet("GetMessageTypes")]
+        public async Task<ActionResult<ResponseBase<List<MessageTypeBasic>>>> GetMessageTypes()
         {
-            var response = await _methodsServices.MethodPrerequisiteAnalysis(methodId);
+            var response = await _messagesServices.GetMessageTypes();
             
             if(response.StatusCode == 200)
             {
                 var results = response.Success ?? [];
 
-                return StatusCode(response.StatusCode, new ResponseBase<List<MethodPrerequisiteAnalysisBasic>>
+                return StatusCode(response.StatusCode, new ResponseBase<List<MessageTypeBasic>>
                 {
                     Data = results
                 });

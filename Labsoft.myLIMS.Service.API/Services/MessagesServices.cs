@@ -1,89 +1,40 @@
-using System.Net.Http.Headers;
+using System.Text;
+using System.Web;
 using Entities;
 using LabsoftAPI;
-using LabsoftAPI.Auth;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Services {
-    public class AuthServices(HttpClient httpClient, IOptions<ApiSettings> settings) : IAuthServices
+    public class MessagesServices(HttpClient httpClient, IOptions<ApiSettings> settings) : IMessagesServices
     {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<LoginResponse, ErrorResponse>> Login(string email, string password)
-        {
-            var request = new HttpRequestMessage(HttpMethod.Post, _settings.LabsoftAuthURL)
-            {
-                Content = new FormUrlEncodedContent([
-                    new KeyValuePair<string, string>("grant_type", "password"),
-                    new KeyValuePair<string, string>("client_id", _settings.LabsoftAuthClientId),
-                    new KeyValuePair<string, string>("username", email),
-                    new KeyValuePair<string, string>("password", password),
-                    new KeyValuePair<string, string>("scope", _settings.LabsoftAuthScope)
-                ])
-            };
-
-            var response = await _httpClient.SendAsync(request);
-            var json = await response.Content.ReadAsStringAsync();
-            ExternalResponse<LoginResponse, ErrorResponse> result;
-            
-            try
-            {
-                if(response.IsSuccessStatusCode)
-                {
-                    result = new ExternalResponse<LoginResponse, ErrorResponse>
-                    {
-                        StatusCode = (int) response.StatusCode,
-                        Success = JsonConvert.DeserializeObject<LoginResponse>(json)
-                    };
-                }
-                else
-                {
-                    result = new ExternalResponse<LoginResponse, ErrorResponse>
-                    {
-                        StatusCode = (int) response.StatusCode,
-                        Error = JsonConvert.DeserializeObject<ErrorResponse>(json)
-                    };
-                }
-            }
-            catch(Exception) {
-                result = new ExternalResponse<LoginResponse, ErrorResponse>
-                {
-                    Error = new ErrorResponse{
-                        Error = "unknown_error",
-                        ErrorDescription = "exception_error"
-                    }
-                };
-            }
-
-            return result;
-        }
-
-        public async Task<ExternalResponse<List<MeResponse>, ErrorResponse>> Me(string email)
+        public async Task<ExternalResponse<List<MessageBasic>, ErrorResponse>> GetMessagesBySampleId(int sampleId)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-            var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/Users?$filter=Email eq '{email}'");
+
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/MessageApi/GetMessagesBySampleId?sampleId={sampleId}");
 
             var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MeResponse>>(json);
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBasic<List<MessageBasic>>>(json);
 
-            ExternalResponse<List<MeResponse>, ErrorResponse> result;
+            ExternalResponse<List<MessageBasic>, ErrorResponse> result;
             
             try
             {
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<MeResponse>, ErrorResponse>
+                    result = new ExternalResponse<List<MessageBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
-                        Success = myLIMSResponse?.Result
+                        Success = myLIMSResponse?.Items
                     };
                 }
                 else
                 {
-                    result = new ExternalResponse<List<MeResponse>, ErrorResponse>
+                    result = new ExternalResponse<List<MessageBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
@@ -95,7 +46,54 @@ namespace Services {
                 }
             }
             catch(Exception) {
-                result = new ExternalResponse<List<MeResponse>, ErrorResponse>
+                result = new ExternalResponse<List<MessageBasic>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<List<MessageTypeBasic>, ErrorResponse>> GetMessageTypes()
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Messages/GetMessageTypes?$top=1000");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MessageTypeBasic>>(json);
+
+            ExternalResponse<List<MessageTypeBasic>, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<List<MessageTypeBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.Result
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<MessageTypeBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<List<MessageTypeBasic>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",

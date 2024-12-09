@@ -6,27 +6,27 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Services {
-    public class EquipmentsServices(HttpClient httpClient, IOptions<ApiSettings> settings) : IEquipmentsServices
+    public class MeasurementUnitsServices(HttpClient httpClient, IOptions<ApiSettings> settings) : IMeasurementUnitsServices
     {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<List<Equipment>, ErrorResponse>> GetEquipmentsByEquipmentTypeId(int equipmentTypeId)
+        public async Task<ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>> GetMeasurementUnits()
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
 
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Equipments/ByEquipmentTypeId/{equipmentTypeId}/WithValidIntervention");
+            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/MeasurementUnits?$top=1000");
 
             var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<Equipment>>(json);
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MeasurementUnitBasic>>(json);
 
-            ExternalResponse<List<Equipment>, ErrorResponse> result;
+            ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse> result;
             
             try
             {
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<Equipment>, ErrorResponse>
+                    result = new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse?.Result
@@ -34,7 +34,7 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<List<Equipment>, ErrorResponse>
+                    result = new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
@@ -46,7 +46,7 @@ namespace Services {
                 }
             }
             catch(Exception) {
-                result = new ExternalResponse<List<Equipment>, ErrorResponse>
+                result = new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
