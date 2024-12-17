@@ -77,7 +77,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 return StatusCode(response.StatusCode, new ResponseBase<List<MethodStatus>>
                 {
@@ -108,7 +108,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 return StatusCode(response.StatusCode, new ResponseBase<List<SampleServiceArea>>
                 {
@@ -148,7 +148,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 return StatusCode(response.StatusCode, new ResponseBase<List<LabsoftAPI.SampleType>>
                 {
@@ -184,7 +184,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 var batchQCs = results.SelectMany(item => item.QCTests!)
                     .Select(subItem => subItem.QCTest).ToList();
@@ -225,7 +225,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 return StatusCode(response.StatusCode, new ResponseBase<List<StartUser>>
                 {
@@ -258,7 +258,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         
             if (response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
         
                 var sampleNumbers = results
                     .Where(sample => !string.IsNullOrEmpty(sample.Sample?.ControlNumber))
@@ -302,7 +302,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
             if (response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 var collectionPoints = results
                     .Select(item => item.Sample)
@@ -346,7 +346,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
             if (response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 var sampleReasons = results
                     .Select(item => item.Sample?.SampleReason)
@@ -390,7 +390,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         
             if (response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 // Use SelectMany to flatten the collection of SampleWorks and extract activities
                 var activities = results
@@ -425,7 +425,6 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     }
                 });
             }
-
         }
 
         [HttpGet("GetForPerformTask")]
@@ -482,137 +481,159 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] DateTime? startStartDate,
             [FromQuery] DateTime? startEndDate,
             [FromQuery] DateTime? collectStartDate,
-            [FromQuery] DateTime? collectEndDate)
+            [FromQuery] DateTime? collectEndDate,
+            [FromQuery] bool useFilters = true)
         {
-            var response = await _samplesServices.GetAllSamples();
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            dynamic response = useFilters ?
+                await _samplesServices.GetAllSamples() :
+                await _samplesServices.GetSampleMethodsCount(identityCenterToken);
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
-
-                if(!sampleIds.IsNullOrEmpty()) {
-                    results = results.Where(item => sampleIds.ToList()
-                        .Contains(item.Sample?.Id ?? 0)).ToList();
-                }
-
-                if(!sampleIdentifications.IsNullOrEmpty()) {
-                    results = results.Where(item => sampleIdentifications.ToList()
-                        .Any(identification => (item.Sample?.Identification ?? "")
-                            .Contains(identification, StringComparison.OrdinalIgnoreCase)))
-                                .ToList();
-                }
-
-                if(!methodIds.IsNullOrEmpty()) {
-                    results = results.Where(item => methodIds.ToList()
-                        .Contains(item.Method?.MasterId ?? 0)).ToList();
-                }
-
-                if(!stageIds.IsNullOrEmpty()) {
-                    results = results.Where(item => stageIds.ToList()
-                        .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
-                }
-
-                if(!serviceAreaIds.IsNullOrEmpty()) {
-                    results = results.Where(item => serviceAreaIds.ToList()
-                        .Contains(item.ServiceArea?.Id ?? 0)).ToList();
-                }
-
-                if(!sampleTypeIds.IsNullOrEmpty()) {
-                    results = results.Where(item => sampleTypeIds.ToList()
-                        .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
-                }
-
-                if(!startUserIds.IsNullOrEmpty()) {
-                    results = results.Where(item => startUserIds.ToList()
-                        .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
-                }
-
-                if(!batchNumbers.IsNullOrEmpty()) {
-                    results = results.Where(item => (item.QCTests ?? [])
-                        .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
-                }
-
-                if(!customValues.IsNullOrEmpty()) {
-                    results = results.Where(item => customValues.ToList()
-                        .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
-                            .Contains(value, StringComparison.OrdinalIgnoreCase)))
-                                .ToList();
-                }
-                                
-                if(!sampleNumbers.IsNullOrEmpty()) {
-                    results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
-                }
-
-                if(!collectionPoints.IsNullOrEmpty()) {
-                    results = results.Where(item => collectionPoints.ToList()
-                            .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
-                }
-
-                if(!sampleReasons.IsNullOrEmpty()) {
-                    results = results.Where(item => sampleReasons.ToList()
-                            .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
-                }
-
-                if(!sampleActivities.IsNullOrEmpty()) {
-                    results = results.Where(item => (item.Sample?.SampleWorks ?? [])
-                            .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
-                }
-
-                if(validityStartDate != null) {
-                    results = results.Where(
-                        item => item.AnalysisDeadline >= validityStartDate &&
-                        item.AnalysisDeadline <= validityEndDate).ToList();
-                }
-
-                if(executionStartDate != null) {
-                    results = results.Where(
-                        item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
-                        item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
-                }
-
-                if(conclusionStartDate != null) {
-                    results = results.Where(
-                        item => item.Conclusion >= conclusionStartDate &&
-                        item.Conclusion <= conclusionEndDate).ToList();
-                }
-
-                if(receiptStartDate != null) {
-                    results = results.Where(
-                        item => item.Sample?.ReceivedTime >= receiptStartDate &&
-                        item.Sample.ReceivedTime <= receiptEndDate).ToList();
-                }
-
-                if(startStartDate != null) {
-                    results = results.Where(
-                        item => item.CurrentStatus?.StartDateTime >= startStartDate &&
-                        item.CurrentStatus.StartDateTime <= startEndDate).ToList();
-                }
-
-                if(collectStartDate != null) {
-                    results = results.Where(
-                        item => item.Sample?.TakenDateTime >= collectStartDate &&
-                        item.Sample.TakenDateTime <= collectEndDate).ToList();
-                }
-
-                return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
+                if(useFilters)
                 {
-                    Ok = response.Success != null,
-                    Data = new SamplesSummary
-                    {
-                        PrepareAnalysis = results.Where(item =>
-                            item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.prepareAnalysis)
-                            .Select(item => item.Sample!).Count(),
-                        CarriedOutAnalysis = results.Where(item =>
-                            item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.carriedOutAnalysis)
-                            .Select(item => item.Sample!).Count(),
-                        ReviewAnalysis = results.Where(item =>
-                            item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.reviewAnalysis)
-                            .Select(item => item.Sample!).Count(),
-                        BatchQC = results.SelectMany(item => item.QCTests!)
-                            .Select(subItem => subItem.QCTest).Count()
+                    var results = (response.Success as MyLIMSResponseBase<AnalysisSample>)?.Result ?? [];
+
+                    if(!sampleIds.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleIds.ToList()
+                            .Contains(item.Sample?.Id ?? 0)).ToList();
                     }
-                });
+
+                    if(!sampleIdentifications.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleIdentifications.ToList()
+                            .Any(identification => (item.Sample?.Identification ?? "")
+                                .Contains(identification, StringComparison.OrdinalIgnoreCase)))
+                                    .ToList();
+                    }
+
+                    if(!methodIds.IsNullOrEmpty()) {
+                        results = results.Where(item => methodIds.ToList()
+                            .Contains(item.Method?.MasterId ?? 0)).ToList();
+                    }
+
+                    if(!stageIds.IsNullOrEmpty()) {
+                        results = results.Where(item => stageIds.ToList()
+                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
+                    }
+
+                    if(!serviceAreaIds.IsNullOrEmpty()) {
+                        results = results.Where(item => serviceAreaIds.ToList()
+                            .Contains(item.ServiceArea?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleTypeIds.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleTypeIds.ToList()
+                            .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
+                    }
+
+                    if(!startUserIds.IsNullOrEmpty()) {
+                        results = results.Where(item => startUserIds.ToList()
+                            .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
+                    }
+
+                    if(!batchNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => (item.QCTests ?? [])
+                            .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
+                    }
+
+                    if(!customValues.IsNullOrEmpty()) {
+                        results = results.Where(item => customValues.ToList()
+                            .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
+                                .Contains(value, StringComparison.OrdinalIgnoreCase)))
+                                    .ToList();
+                    }
+                                    
+                    if(!sampleNumbers.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleNumbers.ToList()
+                                .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
+                    }
+
+                    if(!collectionPoints.IsNullOrEmpty()) {
+                        results = results.Where(item => collectionPoints.ToList()
+                                .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleReasons.IsNullOrEmpty()) {
+                        results = results.Where(item => sampleReasons.ToList()
+                                .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
+                    }
+
+                    if(!sampleActivities.IsNullOrEmpty()) {
+                        results = results.Where(item => (item.Sample?.SampleWorks ?? [])
+                                .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
+                    }
+
+                    if(validityStartDate != null) {
+                        results = results.Where(
+                            item => item.AnalysisDeadline >= validityStartDate &&
+                            item.AnalysisDeadline <= validityEndDate).ToList();
+                    }
+
+                    if(executionStartDate != null) {
+                        results = results.Where(
+                            item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
+                            item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
+                    }
+
+                    if(conclusionStartDate != null) {
+                        results = results.Where(
+                            item => item.Conclusion >= conclusionStartDate &&
+                            item.Conclusion <= conclusionEndDate).ToList();
+                    }
+
+                    if(receiptStartDate != null) {
+                        results = results.Where(
+                            item => item.Sample?.ReceivedTime >= receiptStartDate &&
+                            item.Sample.ReceivedTime <= receiptEndDate).ToList();
+                    }
+
+                    if(startStartDate != null) {
+                        results = results.Where(
+                            item => item.CurrentStatus?.StartDateTime >= startStartDate &&
+                            item.CurrentStatus.StartDateTime <= startEndDate).ToList();
+                    }
+
+                    if(collectStartDate != null) {
+                        results = results.Where(
+                            item => item.Sample?.TakenDateTime >= collectStartDate &&
+                            item.Sample.TakenDateTime <= collectEndDate).ToList();
+                    }
+
+                    return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
+                    {
+                        Ok = response.Success != null,
+                        Data = new SamplesSummary
+                        {
+                            PrepareAnalysis = results.Where(item =>
+                                item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.prepareAnalysis)
+                                .Select(item => item.Sample!).Count(),
+                            CarriedOutAnalysis = results.Where(item =>
+                                item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.carriedOutAnalysis)
+                                .Select(item => item.Sample!).Count(),
+                            ReviewAnalysis = results.Where(item =>
+                                item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.reviewAnalysis)
+                                .Select(item => item.Sample!).Count(),
+                            BatchQC = results.SelectMany(item => item.QCTests!)
+                                .Select(subItem => subItem.QCTest).Count()
+                        }
+                    });
+                }
+                else
+                {
+                    var results = response.Success as SampleMethodsCount;
+                    return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
+                    {
+                        Ok = response.Success != null,
+                        Data = new SamplesSummary
+                        {
+                            PrepareAnalysis = results?.SampleMethodsToPrepareCount ?? 0,
+                            CarriedOutAnalysis = results?.SampleMethodsToExecuteCount ?? 0,
+                            ReviewAnalysis = results?.SampleMethodsToReviewCount ?? 0,
+                            BatchQC = results?.AvaliableQcTestsCount ?? 0
+                        }
+                    });
+                }
             }
             else
             {
@@ -659,16 +680,24 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] DateTime? collectStartDate,
             [FromQuery] DateTime? collectEndDate,
             [FromQuery] int perPage = 10,
-            [FromQuery] int page = 1)
+            [FromQuery] int page = 1,
+            [FromQuery] bool useFilters = true)
         {
 
             if (Enum.TryParse<SampleType>(sampleType, out var type))
             {
-                var response = await _samplesServices.GetAllSamples((int) type);
+                ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> response;
+
+                if(useFilters) {
+                    response = await _samplesServices.GetAllSamples((int) type);
+                }
+                else {
+                    response = await _samplesServices.GetAllSamples((int) type, perPage, (page - 1) * perPage);
+                }
 
                 if(response.StatusCode == 200)
                 {
-                    var results = response.Success ?? [];
+                    var results = response.Success?.Result ?? [];
 
                     if (Enum.TryParse<SampleSortParam>(sortParam, out var param)) {
                         switch(param) {
@@ -871,13 +900,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         {
                             CurrentPage = page,
                             PerPage = perPage,
-                            TotalPages = (int) Math.Ceiling((double) results.Count / perPage),
-                            TotalItems = results.Count,
-                            Items = samples.Skip((page - 1) * perPage)
-                                .Take(perPage).ToList()
+                            TotalPages = (int) Math.Ceiling((double) (useFilters ? results.Count : response.Success?.TotalCount ?? 0) / perPage),
+                            TotalItems = useFilters ? results.Count : response.Success?.TotalCount ?? 0,
+                            Items = useFilters ? [.. samples.Skip((page - 1) * perPage).Take(perPage)] : samples
                         }
                     });
-                    
                 }
                 else
                 {
@@ -893,18 +920,18 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     });
                 }
             }
-                else
+            else
+            {
+                return BadRequest(new ResponseBase<dynamic>
                 {
-                    return BadRequest(new ResponseBase<dynamic>
+                    Ok = false,
+                    Message = "invalid_sample_type",
+                    Error = new ErrorBase
                     {
-                        Ok = false,
-                        Message = "invalid_sample_type",
-                        Error = new ErrorBase
-                        {
-                            Code = "bad_request",
-                            Description = "invalid_sample_type"
-                        }
-                    });
+                        Code = "bad_request",
+                        Description = "invalid_sample_type"
+                    }
+                });
             }
         }
 
@@ -942,7 +969,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             
             if(response.StatusCode == 200)
             {
-                var results = response.Success ?? [];
+                var results = response.Success?.Result ?? [];
 
                 if(!sampleIds.IsNullOrEmpty()) {
                     results = results.Where(item => sampleIds.ToList()

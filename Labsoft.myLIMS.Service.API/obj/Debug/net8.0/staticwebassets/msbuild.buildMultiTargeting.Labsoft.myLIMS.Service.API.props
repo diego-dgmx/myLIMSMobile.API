@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/Labsoft.myLIMS.Service.API.props" />
-</Project>
