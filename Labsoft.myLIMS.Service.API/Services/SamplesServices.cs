@@ -73,9 +73,6 @@ namespace Services {
 
             var json = await response.Content.ReadAsStringAsync();
 
-            // Para depuración
-            Console.WriteLine(json);
-
             ExternalResponse<List<QCTest>, ErrorResponse> result;
 
             try
@@ -120,19 +117,23 @@ namespace Services {
         }
 
 
-        public async Task<ExternalResponse<List<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null)
+        public async Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null, int? top = null, int? skip = null)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
             
             var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/Samples/GetAllMethodsForPerformTask");
 
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["$top"] = (await TotalCountSamples()).ToString();
+            query["$top"] = top == null ? (await TotalCountSamples()).ToString() : $"{top}";
+            if(skip != null)
+            {
+                query["$skip"] = $"{skip}";
+            }
+
             query["$inlinecount"] = "allpages";
-            query["$filter"] = "Sample/Received eq true and Sample/Finalized eq false";
             if(sampleType != null)
             {
-                query["$filter"] += $" and CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                query["$filter"] += $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
             }
 
             uriBuilder.Query = query.ToString();
@@ -142,21 +143,21 @@ namespace Services {
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
 
-            ExternalResponse<List<AnalysisSample>, ErrorResponse> result;
+            ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> result;
             
             try
             {
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<AnalysisSample>, ErrorResponse>
+                    result = new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
-                        Success = myLIMSResponse?.Result
+                        Success = myLIMSResponse
                     };
                 }
                 else
                 {
-                    result = new ExternalResponse<List<AnalysisSample>, ErrorResponse>
+                    result = new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
@@ -168,7 +169,7 @@ namespace Services {
                 }
             }
             catch(Exception) {
-                result = new ExternalResponse<List<AnalysisSample>, ErrorResponse>
+                result = new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
@@ -233,10 +234,9 @@ namespace Services {
             var query = HttpUtility.ParseQueryString(uriBuilder.Query);
             query["$top"] = "0";
             query["$inlinecount"] = "allpages";
-            query["$filter"] = "Sample/Received eq true and Sample/Finalized eq false";
             if(sampleType != null)
             {
-                query["$filter"] += $" and CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                query["$filter"] += $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
             }
 
             uriBuilder.Query = query.ToString();
@@ -395,6 +395,53 @@ namespace Services {
             }
             catch(Exception) {
                 result = new ExternalResponse<string, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+
+            var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodsCount");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<SampleMethodsCount>(json);
+
+            ExternalResponse<SampleMethodsCount, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<SampleMethodsCount, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<SampleMethodsCount, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<SampleMethodsCount, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
