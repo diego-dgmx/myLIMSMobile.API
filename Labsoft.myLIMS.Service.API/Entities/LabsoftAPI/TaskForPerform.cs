@@ -52,7 +52,7 @@ namespace LabsoftAPI
         public bool? AllowAnyValue { get; set; }
         public bool? AllowText { get; set; }
         public EquipmentType? EquipmentType { get; set; }
-        public ConsumableType? ConsumableType { get; set; }
+        public SimpleConsumableType? ConsumableType { get; set; }
         public List<object>? Options { get; set; }
     }
 
@@ -119,17 +119,11 @@ namespace LabsoftAPI
         public int? SampleId { get; set; }
     }
 
-    public class ConsumableType
+    public class SimpleConsumableType
     {
         public int Id { get; set; }
         public string? Identification { get; set; }
         public MeasurementUnit? MeasurementUnit { get; set; }
-    }
-
-    public class MeasurementUnit
-    {
-        public int? Id { get; set; }
-        public string? Identification { get; set; }
     }
 
     public class RelatedAccount
