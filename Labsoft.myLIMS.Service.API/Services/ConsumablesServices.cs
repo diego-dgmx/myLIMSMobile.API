@@ -11,6 +11,98 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
+        public async Task<ExternalResponse<ConsumableBasic, ErrorResponse>> GetConsumable(string? identityCenterToken, int id)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+            var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<ConsumableBasic>(json);
+
+            ExternalResponse<ConsumableBasic, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<ConsumableBasic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<ConsumableBasic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<ConsumableBasic, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>> GetConsumableMovements(string? identityCenterToken, int id)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+            var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/Movements?$top=1000");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<ConsumableMovementBasic>>(json);
+
+            ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.Result ?? []
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
         public async Task<ExternalResponse<MyLIMSResponseBase<ConsumableBasic>, ErrorResponse>> GetConsumables(
             string? identityCenterToken, int? top = null, int? skip = null, string? orderBy = null)
         {
@@ -115,6 +207,52 @@ namespace Services {
             }
             catch(Exception) {
                 result = new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>> GetConsumableServiceAreas(string? identityCenterToken, int id)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+            var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceAreas");
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceAreaBasic>>(json);
+
+            ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",

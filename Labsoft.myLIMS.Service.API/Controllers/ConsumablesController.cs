@@ -53,6 +53,96 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ResponseBase<ConsumableBasic>>> GetConsumable(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.GetConsumable(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<ConsumableBasic>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}/Movements")]
+        public async Task<ActionResult<ResponseBase<List<ConsumableMovementBasic>>>> GetConsumableMovements(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.GetConsumableMovements(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<ConsumableMovementBasic>>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}/ServiceAreas")]
+        public async Task<ActionResult<ResponseBase<List<ConsumableServiceAreaBasic>>>> GetConsumableServiceAreas(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.GetConsumableServiceAreas(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<ConsumableServiceAreaBasic>>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("{consumableTypeId}/ByConsumableTypeId")]
         public async Task<ActionResult<ResponseBase<List<SimpleConsumableBasic>>>> ByConsumableTypeId(int consumableTypeId)
         {
