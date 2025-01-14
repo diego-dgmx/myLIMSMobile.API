@@ -104,5 +104,58 @@ namespace Services {
 
             return result;
         }
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> SendMessage(
+            string? identityCenterToken, SendMessageWithEntitiesAttachedDTO body)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Messages/SendMessageWithEntitiesAttached", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+
+            ExternalResponse<dynamic, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
     }
 }
