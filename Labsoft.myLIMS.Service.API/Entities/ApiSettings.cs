@@ -8,6 +8,7 @@ namespace Entities
         public required string LabsoftMyLIMSApiURLBase { get; set; }
         public required string MyLIMSApiAccessKey { get; set; }
         public required string LabsoftAuthClientId { get; set; }
+        public required string LabsoftAuthAudience { get; set; }
         public required string LabsoftAuthScope { get; set; }
     }
 }

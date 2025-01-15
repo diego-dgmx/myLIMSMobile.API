@@ -11,15 +11,20 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<LoginResponse, ErrorResponse>> Login(string email, string password)
+        public async Task<ExternalResponse<LoginResponse, ErrorResponse>> Login(string? email, string? password, string? refreshToken)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, _settings.LabsoftAuthURL)
             {
-                Content = new FormUrlEncodedContent([
+                Content = refreshToken != null ? new FormUrlEncodedContent([
+                    new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                    new KeyValuePair<string, string>("client_id", _settings.LabsoftAuthClientId),
+                    new KeyValuePair<string, string>("refresh_token", refreshToken)
+                ]) : new FormUrlEncodedContent([
                     new KeyValuePair<string, string>("grant_type", "password"),
                     new KeyValuePair<string, string>("client_id", _settings.LabsoftAuthClientId),
-                    new KeyValuePair<string, string>("username", email),
-                    new KeyValuePair<string, string>("password", password),
+                    new KeyValuePair<string, string>("audience", _settings.LabsoftAuthAudience),
+                    new KeyValuePair<string, string>("username", email ?? ""),
+                    new KeyValuePair<string, string>("password", password ?? ""),
                     new KeyValuePair<string, string>("scope", _settings.LabsoftAuthScope)
                 ])
             };
