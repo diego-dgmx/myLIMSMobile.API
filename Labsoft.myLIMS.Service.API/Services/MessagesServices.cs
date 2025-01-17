@@ -140,7 +140,7 @@ namespace Services {
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = myLIMSResponse
                         }
                     };
                 }

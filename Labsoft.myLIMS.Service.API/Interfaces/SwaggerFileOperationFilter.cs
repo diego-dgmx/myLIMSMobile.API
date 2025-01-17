@@ -1,6 +1,5 @@
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Linq;
 
 namespace Interfaces
 {
@@ -25,7 +24,7 @@ namespace Interfaces
                                 Type = "object",
                                 Properties = new Dictionary<string, OpenApiSchema>
                                 {
-                                    [paramName] = new OpenApiSchema
+                                    [paramName!] = new OpenApiSchema
                                     {
                                         Type = "string",
                                         Format = "binary"
