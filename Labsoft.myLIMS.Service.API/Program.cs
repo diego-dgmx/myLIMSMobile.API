@@ -30,6 +30,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     c.OperationFilter<AuthorizeCheckOperationFilter>();
+    c.OperationFilter<SwaggerFileOperationFilter>();
 });
 
 builder.Services.AddCors(options =>
@@ -69,9 +70,11 @@ builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<ISamplesServices, SamplesServices>();
 builder.Services.AddScoped<IMethodsServices, MethodsServices>();
 builder.Services.AddScoped<IConsumablesServices, ConsumablesServices>();
+builder.Services.AddScoped<IConsumableTypesServices, ConsumableTypesServices>();
 builder.Services.AddScoped<IEquipmentsServices, EquipmentsServices>();
 builder.Services.AddScoped<IQCTestsServices, QCTestsServices>();
 builder.Services.AddScoped<IMessagesServices, MessagesServices>();
+builder.Services.AddScoped<IFilesServices, FilesServices>();
 builder.Services.AddScoped<IMeasurementUnitsServices, MeasurementUnitsServices>();
 builder.Services.AddScoped<ISystemConfigsServices, SystemConfigsServices>();
 

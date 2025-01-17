@@ -2,7 +2,6 @@ using Entities;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
@@ -53,6 +52,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 var results = response.Success ?? [];
 
                 return StatusCode(response.StatusCode, new ResponseBase<List<MessageTypeBasic>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("SendMessageWithEntitiesAttached")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> SendMessageWithEntitiesAttached(
+            [FromBody] SendMessageWithEntitiesAttachedDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _messagesServices.SendMessage(identityCenterToken, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Data = results
                 });

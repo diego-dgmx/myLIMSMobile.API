@@ -680,176 +680,217 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] DateTime? collectStartDate,
             [FromQuery] DateTime? collectEndDate,
             [FromQuery] int perPage = 10,
-            [FromQuery] int page = 1,
-            [FromQuery] bool useFilters = true)
+            [FromQuery] int page = 1)
         {
-
             if (Enum.TryParse<SampleType>(sampleType, out var type))
             {
-                ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> response;
+                if (Enum.TryParse<SampleSortParam>(sortParam, out var param)) {
+                    switch(param) {
+                        case SampleSortParam.batchQC:
+                            sortParam = "QCTest/Id";
+                            break;
+                        case SampleSortParam.id:
+                            sortParam = "Sample/Id";
+                            break;
+                        case SampleSortParam.analyticsMethod:
+                            sortParam = "Method/MasterId";
+                            break;
+                        case SampleSortParam.sampleType:
+                            sortParam = "Sample/SampleType/Id";
+                            break;
+                        case SampleSortParam.stage:
+                            sortParam = "CurrentStatus/MethodStatus/Id";
+                            break;
+                        case SampleSortParam.serviceArea:
+                            sortParam = "ServiceArea/Id";
+                            break;
+                        case SampleSortParam.startUser:
+                            sortParam = "CurrentStatus/StartUser/Id";
+                            break;
+                        case SampleSortParam.date:
+                            sortParam = "Sample/ReceivedTime";
+                            break;
+                        case SampleSortParam.sampleNumber:
+                            sortParam = "Sample/ControlNumber";
+                            break;
+                        case SampleSortParam.sampleIdentification:
+                            sortParam = "Sample/Identification";
+                            break;
+                        case SampleSortParam.customInfo:
+                            sortParam = "SampleCustomInfo/DisplayValue";
+                            break;
+                        case SampleSortParam.activities:
+                            sortParam = "Sample/SampleWorks";
+                            break;
+                        case SampleSortParam.collectionPoint:
+                            sortParam = "Sample/CollectionPoint/Id";
+                            break;
+                        case SampleSortParam.sampleReason:
+                            sortParam = "Sample/SampleReason/Id";
+                            break;
+                    }
+                }
 
-                if(useFilters) {
-                    response = await _samplesServices.GetAllSamples((int) type);
+                string filter = "";
+
+                if(!sampleIds.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in sampleIds) {
+                        values.Add($"Sample/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
                 }
-                else {
-                    response = await _samplesServices.GetAllSamples((int) type, perPage, (page - 1) * perPage);
+
+                if(!sampleIdentifications.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(string identification in sampleIdentifications) {
+                        values.Add($"substringof('{identification}', Sample/Identification)");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
                 }
+
+                if(!methodIds.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in methodIds) {
+                        values.Add($"Method/MasterId eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!stageIds.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in stageIds) {
+                        values.Add($"CurrentStatus/MethodStatus/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!serviceAreaIds.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in serviceAreaIds) {
+                        values.Add($"ServiceArea/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!sampleTypeIds.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in sampleTypeIds) {
+                        values.Add($"Sample/SampleType/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!startUserIds.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in startUserIds) {
+                        values.Add($"CurrentStatus/StartUser/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!batchNumbers.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int number in batchNumbers) {
+                        values.Add($"substringof('{number}', b/QCTest/Number)");
+                    }
+
+                    filter += $"QCTests/any(b: {string.Join(" or ", values)}) and ";
+                }
+
+                if(!customValues.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(string value in customValues) {
+                        values.Add($"SampleCustomInfo/DisplayValue eq {value}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!sampleNumbers.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(string number in sampleNumbers) {
+                        values.Add($"substringof('{number}', Sample/ControlNumber)");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!collectionPoints.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in collectionPoints) {
+                        values.Add($"Sample/CollectionPoint/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!sampleReasons.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in sampleReasons) {
+                        values.Add($"Sample/SampleReason/Id eq {id}");
+                    }
+
+                    filter += $"({string.Join(" or ", values)}) and ";
+                }
+
+                if(!sampleActivities.IsNullOrEmpty()) {
+                    List<string> values = [];
+                    foreach(int id in sampleActivities) {
+                        values.Add($"b/Work/Id eq {id}");
+                    }
+
+                    filter += $"Sample/SampleWorks/any(b: {string.Join(" or ", values)}) and ";
+                }
+
+                if(validityStartDate != null) {
+                    filter += $"(AnalysisDeadline gt datetime'{validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and AnalysisDeadline lt datetime'{validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
+                if(executionStartDate != null) {
+                    filter += $"(CurrentStatus/ExecuteDateTime gt datetime'{executionStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and CurrentStatus/ExecuteDateTime lt datetime'{executionEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
+                if(conclusionStartDate != null) {
+                    filter += $"(Conclusion gt datetime'{conclusionStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and Conclusion lt datetime'{conclusionEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
+                if(receiptStartDate != null) {
+                    filter += $"(Sample/ReceivedTime gt datetime'{receiptStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and Sample/ReceivedTime lt datetime'{receiptEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
+                if(startStartDate != null) {
+                    filter += $"(CurrentStatus/StartDateTime gt datetime'{startStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and CurrentStatus/StartDateTime lt datetime'{startEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
+                if(collectStartDate != null) {
+                    filter += $"(Sample/TakenDateTime gt datetime'{collectStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and Sample/TakenDateTime lt datetime'{collectEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
+                if(filter.Length > 0) {
+                    filter = filter[..^5];
+                }
+
+                ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> response;
+                response = await _samplesServices.GetAllSamples(
+                    (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
 
                 if(response.StatusCode == 200)
                 {
                     var results = response.Success?.Result ?? [];
-
-                    if (Enum.TryParse<SampleSortParam>(sortParam, out var param)) {
-                        switch(param) {
-                            case SampleSortParam.batchQC:
-                                results = [.. results.OrderBy(r => r.Sample?.Id)];
-                                break;
-                            case SampleSortParam.id:
-                                results = [.. results.OrderBy(r => r.Sample?.Id)];
-                                break;
-                            case SampleSortParam.analyticsMethod:
-                                results = [.. results.OrderBy(r => r.Method?.MasterId)];
-                                break;
-                            case SampleSortParam.sampleType:
-                                results = [.. results.OrderBy(r => r.Sample?.SampleType?.Id)];
-                                break;
-                            case SampleSortParam.stage:
-                                results = [.. results.OrderBy(r => r.CurrentStatus?.MethodStatus?.Id)];
-                                break;
-                            case SampleSortParam.serviceArea:
-                                results = [.. results.OrderBy(r => r.ServiceArea?.Id)];
-                                break;
-                            case SampleSortParam.startUser:
-                                results = [.. results.OrderBy(r => r.CurrentStatus?.StartUser?.Id)];
-                                break;
-                            case SampleSortParam.date:
-                                results = [.. results.OrderBy(r => r.AnalysisDeadline)];
-                                break;
-                            case SampleSortParam.sampleNumber:
-                                results = [.. results.OrderBy(r => r.Sample?.ControlNumber)];
-                                break;
-                            case SampleSortParam.sampleIdentification:
-                                results = [.. results.OrderBy(r => r.Sample?.Identification)];
-                                break;
-                            case SampleSortParam.customInfo:
-                                results = [.. results.OrderBy(r => r.SampleCustomInfo?.DisplayValue)];
-                                break;
-                            case SampleSortParam.activities:
-                                results = [.. results.OrderBy(r => r.Sample?.Id)];
-                                break;
-                            case SampleSortParam.collectionPoint:
-                                results = [.. results.OrderBy(r => r.Sample?.CollectionPoint?.Id)];
-                                break;
-                            case SampleSortParam.sampleReason:
-                                results = [.. results.OrderBy(r => r.Sample?.SampleReason?.Id)];
-                                break;
-                        }
-                    }
-
-                    if(!sampleIds.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleIds.ToList()
-                            .Contains(item.Sample?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleIdentifications.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleIdentifications.ToList()
-                            .Any(identification => (item.Sample?.Identification ?? "")
-                                .Contains(identification, StringComparison.OrdinalIgnoreCase)))
-                                    .ToList();
-                    }
-
-                    if(!methodIds.IsNullOrEmpty()) {
-                        results = results.Where(item => methodIds.ToList()
-                            .Contains(item.Method?.MasterId ?? 0)).ToList();
-                    }
-
-                    if(!stageIds.IsNullOrEmpty()) {
-                        results = results.Where(item => stageIds.ToList()
-                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
-                    }
-
-                    if(!serviceAreaIds.IsNullOrEmpty()) {
-                        results = results.Where(item => serviceAreaIds.ToList()
-                            .Contains(item.ServiceArea?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleTypeIds.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleTypeIds.ToList()
-                            .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
-                    }
-
-                    if(!startUserIds.IsNullOrEmpty()) {
-                        results = results.Where(item => startUserIds.ToList()
-                            .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
-                    }
-
-                    if(!batchNumbers.IsNullOrEmpty()) {
-                        results = results.Where(item => (item.QCTests ?? [])
-                            .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
-                    }
-
-                    if(!customValues.IsNullOrEmpty()) {
-                        results = results.Where(item => customValues.ToList()
-                            .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
-                                .Contains(value, StringComparison.OrdinalIgnoreCase)))
-                                    .ToList();
-                    }
-
-                    if(!sampleNumbers.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleNumbers.ToList()
-                            .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
-                    }
-
-                    if(!collectionPoints.IsNullOrEmpty()) {
-                        results = results.Where(item => collectionPoints.ToList()
-                                .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleReasons.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleReasons.ToList()
-                                .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleActivities.IsNullOrEmpty()) {
-                        results = results.Where(item => (item.Sample?.SampleWorks ?? [])
-                                .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
-                    }
-
-                    if(validityStartDate != null) {
-                        results = results.Where(
-                            item => item.AnalysisDeadline >= validityStartDate &&
-                            item.AnalysisDeadline <= validityEndDate).ToList();
-                    }
-
-                    if(executionStartDate != null) {
-                        results = results.Where(
-                            item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
-                            item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
-                    }
-
-                    if(conclusionStartDate != null) {
-                        results = results.Where(
-                            item => item.Conclusion >= conclusionStartDate &&
-                            item.Conclusion <= conclusionEndDate).ToList();
-                    }
-
-                    if(receiptStartDate != null) {
-                        results = results.Where(
-                            item => item.Sample?.ReceivedTime >= receiptStartDate &&
-                            item.Sample.ReceivedTime <= receiptEndDate).ToList();
-                    }
-
-                    if(startStartDate != null) {
-                        results = results.Where(
-                            item => item.CurrentStatus?.StartDateTime >= startStartDate &&
-                            item.CurrentStatus.StartDateTime <= startEndDate).ToList();
-                    }
-
-                    if(collectStartDate != null) {
-                        results = results.Where(
-                            item => item.Sample?.TakenDateTime >= collectStartDate &&
-                            item.Sample.TakenDateTime <= collectEndDate).ToList();
-                    }
                     
                     var samples = results.Select(item => new SampleDTO
                     {
@@ -900,9 +941,9 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         {
                             CurrentPage = page,
                             PerPage = perPage,
-                            TotalPages = (int) Math.Ceiling((double) (useFilters ? results.Count : response.Success?.TotalCount ?? 0) / perPage),
-                            TotalItems = useFilters ? results.Count : response.Success?.TotalCount ?? 0,
-                            Items = useFilters ? [.. samples.Skip((page - 1) * perPage).Take(perPage)] : samples
+                            TotalPages = (int) Math.Ceiling((double) (response.Success?.TotalCount ?? 0) / perPage),
+                            TotalItems = response.Success?.TotalCount ?? 0,
+                            Items = samples
                         }
                     });
                 }

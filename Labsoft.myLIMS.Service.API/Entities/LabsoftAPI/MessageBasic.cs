@@ -37,9 +37,15 @@ namespace LabsoftAPI {
         public bool? Read { get; set; }
         public DateTime? OrderDateTime { get; set; }
         public List<Recipient>? Recipients { get; set; }
-        public List<object>? Files { get; set; }
+        public List<MessageFile>? Files { get; set; }
         public object? Works { get; set; }
         public object? Samples { get; set; }
         public object? SampleMethods { get; set; }
+    }
+
+    public class MessageFile {
+        public int? Id { get; set; }
+        public int? FileId { get; set; }
+        public string? FileIdentification { get; set; }
     }
 }

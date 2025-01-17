@@ -1,5 +1,5 @@
 namespace LabsoftAPI {
-    public class Consumable
+    public class SimpleConsumableBasic
     {
         public int? Id { get; set; }
         public string? Identification { get; set; }

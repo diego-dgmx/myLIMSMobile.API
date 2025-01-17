@@ -22,7 +22,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpPost("Login")]
         public async Task<ActionResult<ResponseBase<LoginResponse>>> Login([FromBody] LoginRequest body)
         {
-            var response = await _authServices.Login(body.Username, body.Password);
+            var response = await _authServices.Login(body.Username, body.Password, body.RefreshToken);
 
             if(response.StatusCode == 200) {
                 response.Success!.AccessToken = GenerateJwtToken(response.Success.AccessToken ?? "");

@@ -117,7 +117,8 @@ namespace Services {
         }
 
 
-        public async Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null, int? top = null, int? skip = null)
+        public async Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetAllSamples(
+            int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
             
@@ -133,7 +134,17 @@ namespace Services {
             query["$inlinecount"] = "allpages";
             if(sampleType != null)
             {
-                query["$filter"] += $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+            }
+
+            if(!filter.IsNullOrEmpty())
+            {
+                query["$filter"] += $" and {filter}";
+            }
+
+            if(!sortParam.IsNullOrEmpty())
+            {
+                query["$orderby"] = sortParam;
             }
 
             uriBuilder.Query = query.ToString();
