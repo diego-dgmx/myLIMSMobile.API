@@ -263,5 +263,57 @@ namespace Services {
 
             return result;
         }
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> SetConsumptionInAnalysis(ConsumableConsumptionInAnalysisDTO body)
+        {
+
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync($"{_settings.MyLIMSApiURLBase}/ConsumableMovementApi/ConsumptionInAnalysis", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+
+            ExternalResponse<dynamic, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = myLIMSResponse
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
     }
 }
