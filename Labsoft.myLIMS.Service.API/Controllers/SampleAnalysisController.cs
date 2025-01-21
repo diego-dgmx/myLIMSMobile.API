@@ -13,7 +13,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     {
         private readonly ISampleAnalysisServices _sampleAnalysisServices = sampleAnalysisServices;
 
-        [HttpPost("GetRevisions")]
+        [HttpGet("GetRevisions")]
         public async Task<ActionResult<ResponseBase<List<SampleRevisionBasic>>>> GetRevisions([FromQuery] int[] sampleAnalysisIds)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
