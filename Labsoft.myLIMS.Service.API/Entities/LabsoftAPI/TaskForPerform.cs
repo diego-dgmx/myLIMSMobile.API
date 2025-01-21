@@ -71,6 +71,28 @@ namespace LabsoftAPI
         public bool? Default { get; set; }
     }
 
+    public class InfosData
+    {
+        public int? Id { get; set; }
+        public int? SampleMethodId { get; set; }
+        public Info? Info { get; set; }
+        public MeasurementUnit? MeasurementUnit { get; set; }
+        public int? Order { get; set; }
+        public string? DisplayValue { get; set; }
+        public int? ForceScale { get; set; }
+        public object? ForceSignifDigits { get; set; }
+        public object? ValueText { get; set; }
+        public object? ValueInteger { get; set; }
+        public double? ValueFloat { get; set; }
+        public object? ValueDateTime { get; set; }
+        public object? ValueBoolean { get; set; }
+        public object? ValueEquipmentId { get; set; }
+        public object? ValueConsumableMovementId { get; set; }
+        public object? ValueFileId { get; set; }
+        public object? FileIdentification { get; set; }
+        public object? FileData { get; set; }
+    }
+
     public class RawsData
     {
         public int? Id { get; set; }
@@ -137,7 +159,7 @@ namespace LabsoftAPI
         public SampleMethod? SampleMethod { get; set; }
         public List<RawsData>? RawsData { get; set; }
         public List<Analysis>? Analyses { get; set; }
-        public List<object>? Infos { get; set; }
+        public List<InfosData>? Infos { get; set; }
         public List<object>? SampleInfos { get; set; }
         public List<object>? LogDAQs { get; set; }
     }
