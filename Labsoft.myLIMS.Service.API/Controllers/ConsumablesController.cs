@@ -201,5 +201,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpPut("{consumableId}/Movements/{movementId}/Inactivate")]
+        public async Task<ActionResult<ResponseBase<string>>> SetConsumptionInAnalysis(
+            int consumableId, int movementId, [FromBody] InactivateMovementDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.InactivateMovement(identityCenterToken, consumableId, movementId, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }

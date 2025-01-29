@@ -13,5 +13,7 @@ namespace Services {
             string? identityCenterToken, int id);
         Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetConsumablesByConsumableTypeId(int consumableTypeId);
         Task<ExternalResponse<dynamic, ErrorResponse>> SetConsumptionInAnalysis(ConsumableConsumptionInAnalysisDTO body);
+        Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
+            string? identityCenterToken, int consumableId, int movementId, InactivateMovementDTO body);
     }
 }
