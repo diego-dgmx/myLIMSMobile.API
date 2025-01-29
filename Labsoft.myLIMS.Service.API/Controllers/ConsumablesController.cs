@@ -203,7 +203,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         }
 
         [HttpPut("{consumableId}/Movements/{movementId}/Inactivate")]
-        public async Task<ActionResult<ResponseBase<string>>> SetConsumptionInAnalysis(
+        public async Task<ActionResult<ResponseBase<string>>> InactivateMovement(
             int consumableId, int movementId, [FromBody] InactivateMovementDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
