@@ -53,6 +53,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpPost("CreateConsumableSample")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> CreateConsumableSample(
+            [FromBody] CreateConsumableSampleDTO body)
+        {
+            var response = await _consumablesServices.CreateConsumableSample(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ResponseBase<ConsumableBasic>>> GetConsumable(int id)
         {
