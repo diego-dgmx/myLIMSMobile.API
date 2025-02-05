@@ -2,6 +2,7 @@ using Entities;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
@@ -13,14 +14,57 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     {
         private readonly IConsumablesServices _consumablesServices = consumablesServices;
 
+        private enum ConsumableSortParam
+        {
+            identification,
+            consumableType
+        }
+
         [HttpGet("")]
         public async Task<ActionResult<ResponseBase<Pagination<ConsumableBasic>>>> GetConsumables(
             [FromQuery] string? sortParam,
+            [FromQuery] string[] consumableIdentifications,
+            [FromQuery] int[] consumableTypeIds,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
+            if (Enum.TryParse<ConsumableSortParam>(sortParam, out var param)) {
+                switch(param) {
+                    case ConsumableSortParam.identification:
+                        sortParam = "Identification";
+                        break;
+                    case ConsumableSortParam.consumableType:
+                        sortParam = "ConsumableType/Id";
+                        break;
+                }
+            }
+
+            string filter = "";
+
+            if(!consumableIdentifications.IsNullOrEmpty()) {
+                List<string> values = [];
+                foreach(string identification in consumableIdentifications) {
+                    values.Add($"substringof('{identification}', Identification)");
+                }
+
+                filter += $"({string.Join(" or ", values)}) and ";
+            }
+
+            if(!consumableTypeIds.IsNullOrEmpty()) {
+                List<string> values = [];
+                foreach(int id in consumableTypeIds) {
+                    values.Add($"ConsumableType/Id eq {id}");
+                }
+
+                filter += $"({string.Join(" or ", values)}) and ";
+            }
+
+            if(filter.Length > 0) {
+                filter = filter[..^5];
+            }
+
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumables(identityCenterToken, perPage, (page - 1) * perPage, sortParam);
+            var response = await _consumablesServices.GetConsumables(identityCenterToken, perPage, (page - 1) * perPage, filter, sortParam);
             
             if(response.StatusCode == 200)
             {
@@ -36,6 +80,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         TotalItems = response.Success?.TotalCount ?? 0,
                         Items = response.Success?.Result ?? []
                     }
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("CreateConsumableSample")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> CreateConsumableSample(
+            [FromBody] CreateConsumableSampleDTO body)
+        {
+            var response = await _consumablesServices.CreateConsumableSample(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = results
                 });
             }
             else
@@ -155,6 +229,67 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 return StatusCode(response.StatusCode, new ResponseBase<List<SimpleConsumableBasic>>
                 {
                     Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("SetConsumptionInAnalysis")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> SetConsumptionInAnalysis(
+            [FromBody] ConsumableConsumptionInAnalysisDTO body)
+        {
+            var response = await _consumablesServices.SetConsumptionInAnalysis(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPut("{consumableId}/Movements/{movementId}/Inactivate")]
+        public async Task<ActionResult<ResponseBase<string>>> InactivateMovement(
+            int consumableId, int movementId, [FromBody] InactivateMovementDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.InactivateMovement(identityCenterToken, consumableId, movementId, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = result
                 });
             }
             else

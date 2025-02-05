@@ -68,6 +68,7 @@ builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSet
 // Add external services scopes
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<ISamplesServices, SamplesServices>();
+builder.Services.AddScoped<ISampleAnalysisServices, SampleAnalysisServices>();
 builder.Services.AddScoped<IMethodsServices, MethodsServices>();
 builder.Services.AddScoped<IConsumablesServices, ConsumablesServices>();
 builder.Services.AddScoped<IConsumableTypesServices, ConsumableTypesServices>();

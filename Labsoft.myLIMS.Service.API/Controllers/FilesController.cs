@@ -13,6 +13,35 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     {
         private readonly IFilesServices _filesServices = filesServices;
 
+        [HttpGet("{fileId}/GetFileData")]
+        public async Task<ActionResult<ResponseBase<string>>> GetFileData(int fileId)
+        {
+            var response = await _filesServices.GetFileData(fileId);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpPost("")]
         [Consumes("multipart/form-data")]
         public async Task<ActionResult<ResponseBase<dynamic>>> UploadFile(

@@ -364,7 +364,7 @@ namespace Services {
             return result;
         }
 
-        public async Task<ExternalResponse<string, ErrorResponse>> AdvanceStep(PerformTaskBackgroundParamsDTO body)
+        public async Task<ExternalResponse<string, ErrorResponse>> AdvanceStatus(int sampleMethodId, AdvanceMethodStatusParamsDTO body)
         {
             _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
 
@@ -374,7 +374,7 @@ namespace Services {
             );
 
             var response = await _httpClient.PostAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/SampleMethods/AdvanceStep", content);
+                $"{_settings.MyLIMSApiURLBase}/v2/Samples/Methods/{sampleMethodId}/AdvanceStatus", content);
 
             var json = await response.Content.ReadAsStringAsync();
             var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);

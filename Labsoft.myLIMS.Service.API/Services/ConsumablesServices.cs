@@ -3,6 +3,7 @@ using System.Web;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace Services {
@@ -10,6 +11,57 @@ namespace Services {
     {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> CreateConsumableSample(CreateConsumableSampleDTO body)
+        {
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync($"{_settings.MyLIMSApiURLBase}/ConsumableApi/NewConsumableSample", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+
+            ExternalResponse<dynamic, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = myLIMSResponse
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
 
         public async Task<ExternalResponse<ConsumableBasic, ErrorResponse>> GetConsumable(string? identityCenterToken, int id)
         {
@@ -104,7 +156,7 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<MyLIMSResponseBase<ConsumableBasic>, ErrorResponse>> GetConsumables(
-            string? identityCenterToken, int? top = null, int? skip = null, string? orderBy = null)
+            string? identityCenterToken, int? top = null, int? skip = null, string? filter = null, string? orderBy = null)
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
             
@@ -119,6 +171,11 @@ namespace Services {
             if(skip != null)
             {
                 query["$skip"] = $"{skip}";
+            }
+
+            if(!filter.IsNullOrEmpty())
+            {
+                query["$filter"] += $"{filter}";
             }
 
             if(orderBy != null)
@@ -253,6 +310,112 @@ namespace Services {
             }
             catch(Exception) {
                 result = new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
+            string? identityCenterToken, int consumableId, int movementId, InactivateMovementDTO body)
+        {
+            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PutAsync(
+                $"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{consumableId}/Movements/{movementId}/Inactivate", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+
+            ExternalResponse<string, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error"
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<string, ErrorResponse>
+                {
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error"
+                    }
+                };
+            }
+
+            return result;
+        }
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> SetConsumptionInAnalysis(ConsumableConsumptionInAnalysisDTO body)
+        {
+
+            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+            var content = new StringContent(
+                JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json"
+            );
+
+            var response = await _httpClient.PostAsync($"{_settings.MyLIMSApiURLBase}/ConsumableMovementApi/ConsumptionInAnalysis", content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+
+            ExternalResponse<dynamic, ErrorResponse> result;
+            
+            try
+            {
+                if(response.IsSuccessStatusCode)
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    result = new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = myLIMSResponse
+                        }
+                    };
+                }
+            }
+            catch(Exception) {
+                result = new ExternalResponse<dynamic, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",

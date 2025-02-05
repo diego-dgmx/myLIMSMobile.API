@@ -1274,10 +1274,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpPost("AdvanceStep")]
-        public async Task<ActionResult<ResponseBase<string>>> AdvanceStep([FromBody] PerformTaskBackgroundParamsDTO body)
+        [HttpPost("Method/{sampleMethodId}/AdvanceStatus")]
+        public async Task<ActionResult<ResponseBase<string>>> AdvanceStatus(int sampleMethodId, [FromBody] AdvanceMethodStatusParamsDTO body)
         {
-            var response = await _samplesServices.AdvanceStep(body);
+            var response = await _samplesServices.AdvanceStatus(sampleMethodId, body);
             
             if(response.StatusCode == 200)
             {
