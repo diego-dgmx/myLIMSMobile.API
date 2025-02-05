@@ -2,6 +2,7 @@ using Entities;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Services;
 
 namespace Labsoft.myLIMS.Service.API.Controllers
@@ -13,14 +14,57 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     {
         private readonly IConsumablesServices _consumablesServices = consumablesServices;
 
+        private enum ConsumableSortParam
+        {
+            identification,
+            consumableType
+        }
+
         [HttpGet("")]
         public async Task<ActionResult<ResponseBase<Pagination<ConsumableBasic>>>> GetConsumables(
             [FromQuery] string? sortParam,
+            [FromQuery] string[] consumableIdentifications,
+            [FromQuery] int[] consumableTypeIds,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
+            if (Enum.TryParse<ConsumableSortParam>(sortParam, out var param)) {
+                switch(param) {
+                    case ConsumableSortParam.identification:
+                        sortParam = "Identification";
+                        break;
+                    case ConsumableSortParam.consumableType:
+                        sortParam = "ConsumableType/Id";
+                        break;
+                }
+            }
+
+            string filter = "";
+
+            if(!consumableIdentifications.IsNullOrEmpty()) {
+                List<string> values = [];
+                foreach(string identification in consumableIdentifications) {
+                    values.Add($"substringof('{identification}', Identification)");
+                }
+
+                filter += $"({string.Join(" or ", values)}) and ";
+            }
+
+            if(!consumableTypeIds.IsNullOrEmpty()) {
+                List<string> values = [];
+                foreach(int id in consumableTypeIds) {
+                    values.Add($"ConsumableType/Id eq {id}");
+                }
+
+                filter += $"({string.Join(" or ", values)}) and ";
+            }
+
+            if(filter.Length > 0) {
+                filter = filter[..^5];
+            }
+
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumables(identityCenterToken, perPage, (page - 1) * perPage, sortParam);
+            var response = await _consumablesServices.GetConsumables(identityCenterToken, perPage, (page - 1) * perPage, filter, sortParam);
             
             if(response.StatusCode == 200)
             {

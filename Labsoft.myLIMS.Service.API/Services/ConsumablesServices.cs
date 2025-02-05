@@ -3,6 +3,7 @@ using System.Web;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace Services {
@@ -155,7 +156,7 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<MyLIMSResponseBase<ConsumableBasic>, ErrorResponse>> GetConsumables(
-            string? identityCenterToken, int? top = null, int? skip = null, string? orderBy = null)
+            string? identityCenterToken, int? top = null, int? skip = null, string? filter = null, string? orderBy = null)
         {
             _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
             
@@ -170,6 +171,11 @@ namespace Services {
             if(skip != null)
             {
                 query["$skip"] = $"{skip}";
+            }
+
+            if(!filter.IsNullOrEmpty())
+            {
+                query["$filter"] += $"{filter}";
             }
 
             if(orderBy != null)
