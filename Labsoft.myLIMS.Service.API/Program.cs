@@ -8,6 +8,11 @@ using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+LogConfiguration.AddSerilogLabsoftApplicationLog(
+    builder.Services,
+    builder.Configuration.GetSection("ApplicationLog"),
+    builder.Environment.EnvironmentName);
+
 builder.Services.AddControllers();
 builder.Services.AddHttpClient(); // Registrar HttpClient
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -62,6 +67,8 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+
+
 //Configure API env settings
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
@@ -94,6 +101,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
+
+app.UseRouting();
 
 app.UseAuthorization();
 
