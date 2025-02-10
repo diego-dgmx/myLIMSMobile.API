@@ -14,7 +14,7 @@ namespace Interfaces
             var logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionDetails()
-                .Enrich.WithProperty("ApplicationName", "Labsoft myLIMS Mobile API")
+                .Enrich.WithProperty("ApplicationName", "Your Application Name Here!!!")
                 .Enrich.WithProperty("Environment", environment)
                 .MinimumLevel.Error()
                 .WriteTo.RabbitMQ(
@@ -29,8 +29,18 @@ namespace Interfaces
                     deliveryMode: RabbitMQDeliveryMode.NonDurable,
                     formatter: jsonFormatter)
                 .WriteTo.Console()
-                .CreateLogger;
+                .CreateLogger();
             services.AddLogging(lb => lb.AddSerilog(logger));
+        }
+
+        public static void CreateLogSender(HttpRequest request, Microsoft.Extensions.Logging.ILogger logger, Exception? ex) {
+            if(ex != null)
+            {
+                var endpoint = $"{request.Method} {request.Path}{request.QueryString}";
+                var message = $"An error occurred on endpoint {endpoint} ended run with system error.";
+
+                logger.LogError(ex, message);
+            }
         }
     }
 }

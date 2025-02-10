@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Entities
 {
     public class ResponseBase<T> {
@@ -10,5 +12,7 @@ namespace Entities
     public class ErrorBase {
         public string? Code { get; set; }
         public string? Description { get; set; }
+        [JsonIgnore]
+        public Exception? Exception { get; set; }
     }
 }

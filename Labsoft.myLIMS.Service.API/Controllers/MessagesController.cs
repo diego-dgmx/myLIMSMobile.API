@@ -1,4 +1,5 @@
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class MessagesController(IMessagesServices messagesServices) : ControllerBase
+    public class MessagesController(IMessagesServices messagesServices, ILogger<MessagesController> logger) : ControllerBase
     {
         private readonly IMessagesServices _messagesServices = messagesServices;
+        private readonly ILogger<MessagesController> _logger = logger;
 
         [HttpGet("{sampleId}/BySampleId")]
         public async Task<ActionResult<ResponseBase<List<MessageBasic>>>> BySampleId(int sampleId)
@@ -29,6 +31,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -58,6 +61,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -89,6 +93,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,

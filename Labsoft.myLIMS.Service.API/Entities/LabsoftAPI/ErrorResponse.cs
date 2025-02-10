@@ -8,5 +8,7 @@ namespace LabsoftAPI
 
         [JsonProperty("error_description")]
         public string? ErrorDescription { get; set; }
+
+        public Exception? Exception { get; set; }
     }
 }

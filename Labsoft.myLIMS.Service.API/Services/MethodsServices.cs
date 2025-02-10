@@ -1,5 +1,4 @@
-using System.Text;
-using System.Web;
+using System.Net;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
@@ -13,20 +12,18 @@ namespace Services {
 
         public async Task<ExternalResponse<string, ErrorResponse>> AnalysisMethodInstruction(int methodId)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Methods/{methodId}/Instruction");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
-
-            ExternalResponse<string, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Methods/{methodId}/Instruction");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -34,46 +31,45 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<string, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<string, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         public async Task<ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>> MethodPrerequisiteAnalysis(int methodId)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Methods/{methodId}/MethodPrerequisiteAnalysis");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MethodPrerequisiteAnalysisBasic>>(json);
-
-            ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Methods/{methodId}/MethodPrerequisiteAnalysis");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MethodPrerequisiteAnalysisBasic>>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>
+                    return new ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse?.Result
@@ -81,28 +77,29 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>
+                    return new ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<List<MethodPrerequisiteAnalysisBasic>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
     }
 }

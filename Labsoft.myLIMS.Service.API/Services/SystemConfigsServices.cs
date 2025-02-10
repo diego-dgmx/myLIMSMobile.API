@@ -1,3 +1,4 @@
+using System.Net;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
@@ -11,20 +12,18 @@ namespace Services {
 
         public async Task<ExternalResponse<SampleListInfo, ErrorResponse>> GetSampleListInfo()
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-            var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/SystemConfigs/GetSampleListInfo");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<SampleListInfo>(json);
-
-            ExternalResponse<SampleListInfo, ErrorResponse> result;
-
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                var response = await _httpClient.GetAsync(
+                    $"{_settings.MyLIMSApiURLBase}/v2/SystemConfigs/GetSampleListInfo");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<SampleListInfo>(json);
+
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<SampleListInfo, ErrorResponse>
+                    return new ExternalResponse<SampleListInfo, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -32,28 +31,29 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<SampleListInfo, ErrorResponse>
+                    return new ExternalResponse<SampleListInfo, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<SampleListInfo, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<SampleListInfo, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
     }
 }

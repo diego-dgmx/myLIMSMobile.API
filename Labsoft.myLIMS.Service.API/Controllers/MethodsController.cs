@@ -1,4 +1,5 @@
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class MethodsController(IMethodsServices methodsServices) : ControllerBase
+    public class MethodsController(IMethodsServices methodsServices, ILogger<MethodsController> logger) : ControllerBase
     {
         private readonly IMethodsServices _methodsServices = methodsServices;
+        private readonly ILogger<MethodsController> _logger = logger;
 
         [HttpGet("{methodId}/AnalysisMethodInstruction")]
         public async Task<ActionResult<ResponseBase<string>>> AnalysisMethodInstruction(int methodId)
@@ -30,6 +32,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -59,6 +62,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,

@@ -1,4 +1,5 @@
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class QCTestsController(IQCTestsServices qcTestsServices) : ControllerBase
+    public class QCTestsController(IQCTestsServices qcTestsServices, ILogger<QCTestsController> logger) : ControllerBase
     {
         private readonly IQCTestsServices _qcTestsServices = qcTestsServices;
+        private readonly ILogger<QCTestsController> _logger = logger;
 
         private enum BatchSortParam
         {
@@ -97,6 +99,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -127,6 +130,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -156,6 +160,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -185,6 +190,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -215,6 +221,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -245,6 +252,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,

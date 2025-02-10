@@ -1,4 +1,5 @@
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class FilesController(IFilesServices filesServices) : ControllerBase
+    public class FilesController(IFilesServices filesServices, ILogger<FilesController> logger) : ControllerBase
     {
         private readonly IFilesServices _filesServices = filesServices;
+        private readonly ILogger<FilesController> _logger = logger;
 
         [HttpGet("{fileId}/GetFileData")]
         public async Task<ActionResult<ResponseBase<string>>> GetFileData(int fileId)
@@ -29,6 +31,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -61,6 +64,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
