@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using System.Web;
 using Entities;
@@ -14,20 +15,18 @@ namespace Services {
 
         public async Task<ExternalResponse<List<AnalysisMethod>, ErrorResponse>> GetAllMethods()
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-            var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/Methods/GetAllWithServiceCenter?$filter=Active eq true");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisMethod>>(json);
-
-            ExternalResponse<List<AnalysisMethod>, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                var response = await _httpClient.GetAsync(
+                    $"{_settings.MyLIMSApiURLBase}/v2/Methods/GetAllWithServiceCenter?$filter=Active eq true");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisMethod>>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
+                    return new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse?.Result
@@ -35,53 +34,51 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
+                    return new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableQCTestsByRoutineBatchId(int routineBatchId)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/QCTests/GetAvailableByQCRoutineBatchId");
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["qCRoutineBatchId"] = routineBatchId.ToString();
-
-            uriBuilder.Query = query.ToString();
-
-            var response = await _httpClient.GetAsync(uriBuilder.ToString());
-
-            var json = await response.Content.ReadAsStringAsync();
-
-            ExternalResponse<List<QCTest>, ErrorResponse> result;
-
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/QCTests/GetAvailableByQCRoutineBatchId");
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+                query["qCRoutineBatchId"] = routineBatchId.ToString();
+
+                uriBuilder.Query = query.ToString();
+
+                var response = await _httpClient.GetAsync(uriBuilder.ToString());
+                var json = await response.Content.ReadAsStringAsync();
+
                 if (response.IsSuccessStatusCode)
                 {
                     var qctests = JsonConvert.DeserializeObject<List<QCTest>>(json);
 
-                    result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                    return new ExternalResponse<List<QCTest>, ErrorResponse>
                     {
                         StatusCode = (int)response.StatusCode,
                         Success = qctests 
@@ -89,78 +86,76 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                    return new ExternalResponse<List<QCTest>, ErrorResponse>
                     {
                         StatusCode = (int)response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                result = new ExternalResponse<List<QCTest>, ErrorResponse>
+                return new ExternalResponse<List<QCTest>, ErrorResponse>
                 {
                     Error = new ErrorResponse
                     {
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
 
         public async Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetAllSamples(
             int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-            
-            var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/Samples/GetAllMethodsForPerformTask");
-
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query["$top"] = top == null ? (await TotalCountSamples()).ToString() : $"{top}";
-            if(skip != null)
-            {
-                query["$skip"] = $"{skip}";
-            }
-
-            query["$inlinecount"] = "allpages";
-            if(sampleType != null)
-            {
-                query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
-            }
-
-            if(!filter.IsNullOrEmpty())
-            {
-                query["$filter"] += $" and {filter}";
-            }
-
-            if(!sortParam.IsNullOrEmpty())
-            {
-                query["$orderby"] = sortParam;
-            }
-
-            uriBuilder.Query = query.ToString();
-
-            var response = await _httpClient.GetAsync(uriBuilder.ToString());
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
-
-            ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                
+                var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/Samples/GetAllMethodsForPerformTask");
+
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+                query["$top"] = top == null ? (await TotalCountSamples()).ToString() : $"{top}";
+                if(skip != null)
+                {
+                    query["$skip"] = $"{skip}";
+                }
+
+                query["$inlinecount"] = "allpages";
+                if(sampleType != null)
+                {
+                    query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                }
+
+                if(!filter.IsNullOrEmpty())
+                {
+                    query["$filter"] += $" and {filter}";
+                }
+
+                if(!sortParam.IsNullOrEmpty())
+                {
+                    query["$orderby"] = sortParam;
+                }
+
+                uriBuilder.Query = query.ToString();
+
+                var response = await _httpClient.GetAsync(uriBuilder.ToString());
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
+                    return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -168,46 +163,45 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
+                    return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         public async Task<ExternalResponse<AnalysisSample, ErrorResponse>> ValidateSampleCode(int barCode)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-            var response = await _httpClient.GetAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/Samples/GetAllMethodsForPerformTaskByBarCode?barCode={barCode}");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
-
-            ExternalResponse<AnalysisSample, ErrorResponse> result;
-
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                var response = await _httpClient.GetAsync(
+                    $"{_settings.MyLIMSApiURLBase}/v2/Samples/GetAllMethodsForPerformTaskByBarCode?barCode={barCode}");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
+
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<AnalysisSample, ErrorResponse>
+                    return new ExternalResponse<AnalysisSample, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = (myLIMSResponse?.Result ?? []).IsNullOrEmpty() ? null : myLIMSResponse?.Result?[0]
@@ -215,28 +209,29 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<AnalysisSample, ErrorResponse>
+                    return new ExternalResponse<AnalysisSample, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<AnalysisSample, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<AnalysisSample, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         private async Task<int> TotalCountSamples(int? sampleType = null) {
@@ -262,24 +257,22 @@ namespace Services {
 
         public async Task<ExternalResponse<List<TaskForPerform>, ErrorResponse>> GetForPerformTask(int[] sampleMethodIds)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var queryParams = sampleMethodIds
-                .Select((value, index) => $"sampleMethodIds[{index}]={value}")
-                .ToArray();
-
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Samples/Methods/GetForPerformTask?{string.Join("&", queryParams)}");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<List<TaskForPerform>>(json);
-
-            ExternalResponse<List<TaskForPerform>, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var queryParams = sampleMethodIds
+                    .Select((value, index) => $"sampleMethodIds[{index}]={value}")
+                    .ToArray();
+
+                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Samples/Methods/GetForPerformTask?{string.Join("&", queryParams)}");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<List<TaskForPerform>>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<TaskForPerform>, ErrorResponse>
+                    return new ExternalResponse<List<TaskForPerform>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -287,52 +280,51 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<List<TaskForPerform>, ErrorResponse>
+                    return new ExternalResponse<List<TaskForPerform>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<List<TaskForPerform>, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<List<TaskForPerform>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         public async Task<ExternalResponse<string, ErrorResponse>> PerformTask(bool calculate, PerformTaskDTO body)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var content = new StringContent(
-                JsonConvert.SerializeObject(body),
-                Encoding.UTF8, "application/json"
-            );
-
-            var response = await _httpClient.PostAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/Samples/PerformTask?calculate={calculate}", content);
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
-
-            ExternalResponse<string, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PostAsync(
+                    $"{_settings.MyLIMSApiURLBase}/v2/Samples/PerformTask?calculate={calculate}", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -340,52 +332,51 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<string, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<string, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         public async Task<ExternalResponse<string, ErrorResponse>> AdvanceStatus(int sampleMethodId, AdvanceMethodStatusParamsDTO body)
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var content = new StringContent(
-                JsonConvert.SerializeObject(body),
-                Encoding.UTF8, "application/json"
-            );
-
-            var response = await _httpClient.PostAsync(
-                $"{_settings.MyLIMSApiURLBase}/v2/Samples/Methods/{sampleMethodId}/AdvanceStatus", content);
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
-
-            ExternalResponse<string, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PostAsync(
+                    $"{_settings.MyLIMSApiURLBase}/v2/Samples/Methods/{sampleMethodId}/AdvanceStatus", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -393,46 +384,45 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<string, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<string, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
 
         public async Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken)
         {
-            _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
-
-            var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodsCount");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<SampleMethodsCount>(json);
-
-            ExternalResponse<SampleMethodsCount, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+
+                var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodsCount");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<SampleMethodsCount>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<SampleMethodsCount, ErrorResponse>
+                    return new ExternalResponse<SampleMethodsCount, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -440,28 +430,29 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<SampleMethodsCount, ErrorResponse>
+                    return new ExternalResponse<SampleMethodsCount, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<SampleMethodsCount, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<SampleMethodsCount, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
     }
 }

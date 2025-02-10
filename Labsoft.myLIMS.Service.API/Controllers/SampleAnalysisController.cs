@@ -1,4 +1,5 @@
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class SampleAnalysisController(ISampleAnalysisServices sampleAnalysisServices) : ControllerBase
+    public class SampleAnalysisController(ISampleAnalysisServices sampleAnalysisServices, ILogger<SampleAnalysisController> logger) : ControllerBase
     {
         private readonly ISampleAnalysisServices _sampleAnalysisServices = sampleAnalysisServices;
+        private readonly ILogger<SampleAnalysisController> _logger = logger;
 
         [HttpGet("GetRevisions")]
         public async Task<ActionResult<ResponseBase<List<SampleRevisionBasic>>>> GetRevisions([FromQuery] int[] sampleAnalysisIds)
@@ -30,6 +32,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,

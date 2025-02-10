@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using LabsoftAPI.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -14,10 +15,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class AuthController(IAuthServices authServices, IConfiguration configuration) : ControllerBase
+    public class AuthController(IAuthServices authServices, IConfiguration configuration, ILogger<AuthController> logger) : ControllerBase
     {
         private readonly IAuthServices _authServices = authServices;
         private readonly IConfiguration _configuration = configuration;
+        private readonly ILogger<AuthController> _logger = logger;
 
         [HttpPost("Login")]
         public async Task<ActionResult<ResponseBase<LoginResponse>>> Login([FromBody] LoginRequest body)
@@ -26,6 +28,9 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
             if(response.StatusCode == 200) {
                 response.Success!.AccessToken = GenerateJwtToken(response.Success.AccessToken ?? "");
+            }
+            else {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
             }
 
             return StatusCode(response.StatusCode, new ResponseBase<LoginResponse>
@@ -75,6 +80,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,
@@ -109,5 +115,4 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
-
 }

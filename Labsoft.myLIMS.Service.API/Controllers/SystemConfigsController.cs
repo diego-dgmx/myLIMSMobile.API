@@ -1,4 +1,5 @@
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,9 +10,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class SystemConfigsController(ISystemConfigsServices systemConfigsServices) : ControllerBase
+    public class SystemConfigsController(ISystemConfigsServices systemConfigsServices, ILogger<SystemConfigsController> logger) : ControllerBase
     {
         private readonly ISystemConfigsServices _systemConfigsServices = systemConfigsServices;
+        private readonly ILogger<SystemConfigsController> _logger = logger;
 
         [HttpGet("GetSampleListInfo")]
         public async Task<ActionResult<ResponseBase<SampleListInfo>>> GetSampleListInfo()
@@ -28,6 +30,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
             else
             {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Ok = false,

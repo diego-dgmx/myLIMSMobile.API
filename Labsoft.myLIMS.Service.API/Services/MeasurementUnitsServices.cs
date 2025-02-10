@@ -1,5 +1,4 @@
-using System.Text;
-using System.Web;
+using System.Net;
 using Entities;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
@@ -13,20 +12,18 @@ namespace Services {
 
         public async Task<ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>> GetMeasurementUnits()
         {
-            _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-            var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/MeasurementUnits?$top=1000");
-
-            var json = await response.Content.ReadAsStringAsync();
-            var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MeasurementUnitBasic>>(json);
-
-            ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse> result;
-            
             try
             {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/MeasurementUnits?$top=1000");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<MeasurementUnitBasic>>(json);
+            
                 if(response.IsSuccessStatusCode)
                 {
-                    result = new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
+                    return new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse?.Result
@@ -34,28 +31,29 @@ namespace Services {
                 }
                 else
                 {
-                    result = new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
+                    return new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error"
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
                         }
                     };
                 }
             }
-            catch(Exception) {
-                result = new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
+            catch(Exception ex) {
+                return new ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>
                 {
                     Error = new ErrorResponse{
                         Error = "unknown_error",
-                        ErrorDescription = "exception_error"
+                        ErrorDescription = "exception_error",
+                        Exception = ex
                     }
                 };
             }
-
-            return result;
         }
     }
 }
