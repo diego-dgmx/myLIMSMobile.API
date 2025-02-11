@@ -48,6 +48,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<SampleRevisionBasic>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",

@@ -14,7 +14,7 @@ namespace Interfaces
             var logger = new LoggerConfiguration()
                 .Enrich.FromLogContext()
                 .Enrich.WithExceptionDetails()
-                .Enrich.WithProperty("ApplicationName", "Your Application Name Here!!!")
+                .Enrich.WithProperty("ApplicationName", "Labsoft.myLIMSMobile.Api")
                 .Enrich.WithProperty("Environment", environment)
                 .MinimumLevel.Error()
                 .WriteTo.RabbitMQ(

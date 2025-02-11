@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using Entities;
 using LabsoftAPI;
 using LabsoftAPI.Auth;
@@ -54,6 +55,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<LoginResponse, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -100,6 +102,55 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<MeResponse>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> LogoutBySessionId(string sessionId)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                var content = new StringContent(sessionId, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.PostAsync($"{_settings.MyLIMSApiURLBase}/v2/Authentication/LogoutBySessionId", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 200,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = 400,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = myLIMSResponse,
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",

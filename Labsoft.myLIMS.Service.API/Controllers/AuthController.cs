@@ -94,6 +94,35 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpPost("LogoutBySessionId")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> LogoutBySessionId([FromBody] string sessionId)
+        {
+            var response = await _authServices.LogoutBySessionId(sessionId);
+            
+            if(response.StatusCode == 200)
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = true,
+                    Data = response.Success
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         private string GenerateJwtToken(string identity)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? ""));

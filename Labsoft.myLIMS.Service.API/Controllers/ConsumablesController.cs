@@ -46,7 +46,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             if(!consumableIdentifications.IsNullOrEmpty()) {
                 List<string> values = [];
                 foreach(string identification in consumableIdentifications) {
-                    values.Add($"substringof('{identification}', Identification)");
+                    values.Add($"contains(Identification,'{identification}')");
                 }
 
                 filter += $"({string.Join(" or ", values)}) and ";
