@@ -50,6 +50,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<AnalysisMethod>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -179,6 +180,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -225,6 +227,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<AnalysisSample, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -296,6 +299,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<TaskForPerform>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -348,6 +352,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<string, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -400,6 +405,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<string, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -446,6 +452,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<SampleMethodsCount, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",

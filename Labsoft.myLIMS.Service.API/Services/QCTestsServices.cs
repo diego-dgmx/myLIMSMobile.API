@@ -55,6 +55,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<int>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -107,6 +108,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<int, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -160,6 +162,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<QCTest>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -213,6 +216,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<QCTestLink>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -266,6 +270,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<QCTestLink>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -319,6 +324,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<QCTest>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",

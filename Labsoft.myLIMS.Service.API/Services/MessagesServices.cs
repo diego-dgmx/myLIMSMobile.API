@@ -48,6 +48,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<MessageBasic>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -94,6 +95,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<List<MessageTypeBasic>, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
@@ -146,6 +148,7 @@ namespace Services {
             catch(Exception ex) {
                 return new ExternalResponse<dynamic, ErrorResponse>
                 {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
                         Error = "unknown_error",
                         ErrorDescription = "exception_error",
