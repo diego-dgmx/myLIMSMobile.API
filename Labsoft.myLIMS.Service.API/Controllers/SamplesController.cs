@@ -681,6 +681,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
+            [FromQuery] DateTime? priorityStartDate,
+            [FromQuery] DateTime? priorityEndDate,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -864,6 +866,11 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     filter += $"Sample/SampleWorks/any(b: {string.Join(" or ", values)}) and ";
                 }
 
+                if(priorityStartDate != null) {
+                    filter += $"(PriorityDate gt datetime'{priorityStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
+                    filter += $"and PriorityDate lt datetime'{priorityEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                }
+
                 if(validityStartDate != null) {
                     filter += $"(AnalysisDeadline gt datetime'{validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
                     filter += $"and AnalysisDeadline lt datetime'{validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
@@ -897,10 +904,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(filter.Length > 0) {
                     filter = filter[..^5];
                 }
-
+                var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
                 ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> response;
-                response = await _samplesServices.GetAllSamples(
-                    (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
+                response = await _samplesServices.GetForExecutionSamples(
+                    identityCenterToken, (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
 
                 if(response.StatusCode == 200)
                 {
