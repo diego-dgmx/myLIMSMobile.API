@@ -476,7 +476,7 @@ namespace Services {
                     query["$skip"] = $"{skip}";
                 }
 
-                query["$inlinecount"] = "allpages";
+                query["$count"] = "true";
                 if(sampleType != null)
                 {
                     query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";

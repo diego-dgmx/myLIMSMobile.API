@@ -761,7 +761,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleIdentifications.IsNullOrEmpty()) {
                     List<string> values = [];
                     foreach(string identification in sampleIdentifications) {
-                        values.Add($"substringof('{identification}', Sample/Identification)");
+                        values.Add($"contains(Sample/Identification, '{identification}')");
                     }
 
                     filter += $"({string.Join(" or ", values)}) and ";
@@ -815,7 +815,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     List<string> values = [];
                     foreach(int number in batchNumbers) {
-                        values.Add($"substringof('{number}', b/QCTest/Number)");
+                        values.Add($"contains(b/QCTest/Number, '{number}')");
                     }
 
                     filter += $"QCTests/any(b: {string.Join(" or ", values)}) and ";
@@ -833,7 +833,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleNumbers.IsNullOrEmpty()) {
                     List<string> values = [];
                     foreach(string number in sampleNumbers) {
-                        values.Add($"substringof('{number}', Sample/ControlNumber)");
+                        values.Add($"contains(Sample/ControlNumber, '{number}')");
                     }
 
                     filter += $"({string.Join(" or ", values)}) and ";
@@ -867,38 +867,38 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 }
 
                 if(priorityStartDate != null) {
-                    filter += $"(PriorityDate gt datetime'{priorityStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and PriorityDate lt datetime'{priorityEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(PriorityDate gt {priorityStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and PriorityDate lt {priorityEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(validityStartDate != null) {
-                    filter += $"(AnalysisDeadline gt datetime'{validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and AnalysisDeadline lt datetime'{validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(AnalysisDeadline gt {validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and AnalysisDeadline lt {validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(executionStartDate != null) {
-                    filter += $"(CurrentStatus/ExecuteDateTime gt datetime'{executionStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and CurrentStatus/ExecuteDateTime lt datetime'{executionEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(CurrentStatus/ExecuteDateTime gt {executionStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and CurrentStatus/ExecuteDateTime lt {executionEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(conclusionStartDate != null) {
-                    filter += $"(Conclusion gt datetime'{conclusionStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and Conclusion lt datetime'{conclusionEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(Conclusion gt {conclusionStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and Conclusion lt {conclusionEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(receiptStartDate != null) {
-                    filter += $"(Sample/ReceivedTime gt datetime'{receiptStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and Sample/ReceivedTime lt datetime'{receiptEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(Sample/ReceivedTime gt {receiptStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and Sample/ReceivedTime lt {receiptEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(startStartDate != null) {
-                    filter += $"(CurrentStatus/StartDateTime gt datetime'{startStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and CurrentStatus/StartDateTime lt datetime'{startEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(CurrentStatus/StartDateTime gt {startStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and CurrentStatus/StartDateTime lt {startEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(collectStartDate != null) {
-                    filter += $"(Sample/TakenDateTime gt datetime'{collectStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and Sample/TakenDateTime lt datetime'{collectEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(Sample/TakenDateTime gt {collectStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and Sample/TakenDateTime lt {collectEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(filter.Length > 0) {
