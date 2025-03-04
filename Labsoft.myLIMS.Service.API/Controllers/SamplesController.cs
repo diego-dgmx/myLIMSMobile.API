@@ -681,6 +681,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
+            [FromQuery] DateTime? priorityStartDate,
+            [FromQuery] DateTime? priorityEndDate,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -759,7 +761,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleIdentifications.IsNullOrEmpty()) {
                     List<string> values = [];
                     foreach(string identification in sampleIdentifications) {
-                        values.Add($"substringof('{identification}', Sample/Identification)");
+                        values.Add($"contains(Sample/Identification, '{identification}')");
                     }
 
                     filter += $"({string.Join(" or ", values)}) and ";
@@ -813,7 +815,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!batchNumbers.IsNullOrEmpty()) {
                     List<string> values = [];
                     foreach(int number in batchNumbers) {
-                        values.Add($"substringof('{number}', b/QCTest/Number)");
+                        values.Add($"contains(b/QCTest/Number, '{number}')");
                     }
 
                     filter += $"QCTests/any(b: {string.Join(" or ", values)}) and ";
@@ -831,7 +833,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 if(!sampleNumbers.IsNullOrEmpty()) {
                     List<string> values = [];
                     foreach(string number in sampleNumbers) {
-                        values.Add($"substringof('{number}', Sample/ControlNumber)");
+                        values.Add($"contains(Sample/ControlNumber, '{number}')");
                     }
 
                     filter += $"({string.Join(" or ", values)}) and ";
@@ -864,43 +866,48 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     filter += $"Sample/SampleWorks/any(b: {string.Join(" or ", values)}) and ";
                 }
 
+                if(priorityStartDate != null) {
+                    filter += $"(PriorityDate gt {priorityStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and PriorityDate lt {priorityEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
+                }
+
                 if(validityStartDate != null) {
-                    filter += $"(AnalysisDeadline gt datetime'{validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and AnalysisDeadline lt datetime'{validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(AnalysisDeadline gt {validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and AnalysisDeadline lt {validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(executionStartDate != null) {
-                    filter += $"(CurrentStatus/ExecuteDateTime gt datetime'{executionStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and CurrentStatus/ExecuteDateTime lt datetime'{executionEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(CurrentStatus/ExecuteDateTime gt {executionStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and CurrentStatus/ExecuteDateTime lt {executionEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(conclusionStartDate != null) {
-                    filter += $"(Conclusion gt datetime'{conclusionStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and Conclusion lt datetime'{conclusionEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(Conclusion gt {conclusionStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and Conclusion lt {conclusionEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(receiptStartDate != null) {
-                    filter += $"(Sample/ReceivedTime gt datetime'{receiptStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and Sample/ReceivedTime lt datetime'{receiptEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(Sample/ReceivedTime gt {receiptStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and Sample/ReceivedTime lt {receiptEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(startStartDate != null) {
-                    filter += $"(CurrentStatus/StartDateTime gt datetime'{startStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and CurrentStatus/StartDateTime lt datetime'{startEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(CurrentStatus/StartDateTime gt {startStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and CurrentStatus/StartDateTime lt {startEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(collectStartDate != null) {
-                    filter += $"(Sample/TakenDateTime gt datetime'{collectStartDate?.ToString("yyyy-MM-ddTHH:mm:ss")}' ";
-                    filter += $"and Sample/TakenDateTime lt datetime'{collectEndDate?.ToString("yyyy-MM-ddTHH:mm:ss")}') and ";
+                    filter += $"(Sample/TakenDateTime gt {collectStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")} ";
+                    filter += $"and Sample/TakenDateTime lt {collectEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ")}) and ";
                 }
 
                 if(filter.Length > 0) {
                     filter = filter[..^5];
                 }
-
+                var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
                 ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> response;
-                response = await _samplesServices.GetAllSamples(
-                    (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
+                response = await _samplesServices.GetForExecutionSamples(
+                    identityCenterToken, (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
 
                 if(response.StatusCode == 200)
                 {
@@ -1303,6 +1310,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 var results = response.Success;
 
                 return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("GetFilterOptions")]
+        public async Task<ActionResult<ResponseBase<SampleMethodFilterOptions>>> GetFilterOptions()
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _samplesServices.GetFilterOptions(identityCenterToken);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<SampleMethodFilterOptions>
                 {
                     Data = results
                 });

@@ -461,5 +461,123 @@ namespace Services {
                 };
             }
         }
+
+        public async Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetForExecutionSamples(
+            string? identityCenterToken, int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null)
+        {
+            try {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/ForExecution");
+
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+                query["$top"] = top == null ? (await TotalCountSamples()).ToString() : $"{top}";
+                if(skip != null)
+                {
+                    query["$skip"] = $"{skip}";
+                }
+
+                query["$count"] = "true";
+                if(sampleType != null)
+                {
+                    query["$filter"] = $"CurrentStatus/MethodStatus/MethodStatusBehaviorId eq {sampleType}";
+                }
+
+                if(!filter.IsNullOrEmpty())
+                {
+                    query["$filter"] += $" and {filter}";
+                }
+
+                if(!sortParam.IsNullOrEmpty())
+                {
+                    query["$orderby"] = sortParam;
+                }
+
+                uriBuilder.Query = query.ToString();
+
+                var response = await _httpClient.GetAsync(uriBuilder.ToString());
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<AnalysisSample>>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<SampleMethodFilterOptions, ErrorResponse>> GetFilterOptions(string? identityCenterToken)
+        {
+            try {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodFilters");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<SampleMethodFilterOptions>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<SampleMethodFilterOptions, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<SampleMethodFilterOptions, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<SampleMethodFilterOptions, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
     }
 }
