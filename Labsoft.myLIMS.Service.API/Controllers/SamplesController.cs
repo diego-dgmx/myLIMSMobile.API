@@ -1329,5 +1329,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpGet("GetFilterOptions")]
+        public async Task<ActionResult<ResponseBase<SampleMethodFilterOptions>>> GetFilterOptions()
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _samplesServices.GetFilterOptions(identityCenterToken);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<SampleMethodFilterOptions>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }

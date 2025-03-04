@@ -5,6 +5,7 @@ namespace Services {
     {
         Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null);
         Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetForExecutionSamples(string? identityCenterToken, int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null);
+        Task<ExternalResponse<SampleMethodFilterOptions, ErrorResponse>> GetFilterOptions(string? identityCenterToken);
         Task<ExternalResponse<List<AnalysisMethod>, ErrorResponse>> GetAllMethods();
         Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken);
         Task<ExternalResponse<AnalysisSample, ErrorResponse>> ValidateSampleCode(int barCode);
