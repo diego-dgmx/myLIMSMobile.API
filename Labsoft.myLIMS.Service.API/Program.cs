@@ -86,6 +86,8 @@ builder.Services.AddScoped<IFilesServices, FilesServices>();
 builder.Services.AddScoped<IMeasurementUnitsServices, MeasurementUnitsServices>();
 builder.Services.AddScoped<ISystemConfigsServices, SystemConfigsServices>();
 builder.Services.AddScoped<IScheduleInterventionsServices, ScheduleInterventionsServices>();
+builder.Services.AddScoped<IServiceAreasServices, ServiceAreasServices>();
+builder.Services.AddScoped<IServiceCentersServices, ServiceCentersServices>();
 
 var app = builder.Build();
 

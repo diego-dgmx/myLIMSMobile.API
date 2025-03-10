@@ -284,10 +284,10 @@ namespace Services {
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceAreas");
 
                 var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceAreaBasic>>(json);
             
                 if(response.IsSuccessStatusCode)
                 {
+                    var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceAreaBasic>>(json);
                     return new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
@@ -311,6 +311,52 @@ namespace Services {
             }
             catch(Exception ex) {
                 return new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>> GetConsumableServiceCenters(string? identityCenterToken, int id)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceCenters");
+
+                var json = await response.Content.ReadAsStringAsync();
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceCenterBasic>>(json);
+                    return new ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{

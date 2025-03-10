@@ -11,6 +11,8 @@ namespace Services {
             string? identityCenterToken, int id);
         Task<ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>> GetConsumableServiceAreas(
             string? identityCenterToken, int id);
+        Task<ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>> GetConsumableServiceCenters(
+            string? identityCenterToken, int id);
         Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetConsumablesByConsumableTypeId(int consumableTypeId);
         Task<ExternalResponse<dynamic, ErrorResponse>> SetConsumptionInAnalysis(ConsumableConsumptionInAnalysisDTO body);
         Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
