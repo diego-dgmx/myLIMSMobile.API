@@ -7,7 +7,7 @@ namespace Services {
         Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetForExecutionSamples(string? identityCenterToken, int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null);
         Task<ExternalResponse<SampleMethodFilterOptions, ErrorResponse>> GetFilterOptions(string? identityCenterToken);
         Task<ExternalResponse<List<AnalysisMethod>, ErrorResponse>> GetAllMethods();
-        Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken);
+        Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken, string? methodMasterIds, string? sampleTypeIds, string? methodStatusIds, string? serviceAreaIds, string? sampleReasonIds, string? workIds, string? startUserIds, string? collectPointIds, string? qcTestIds, string? sampleIds, string? sampleIdentification, string? sampleControlNumber, string? validityStartDateTime, string? validityEndDateTime, string? executionStartDateTime, string? executionEndDateTime, string? conclusionStartDateTime, string? conclusionEndDateTime, string? receivedStartDateTime, string? receivedEndDateTime, string? startStartDateTime, string? startEndDateTime, string? takenStartDateTime, string? takenEndDateTime);
         Task<ExternalResponse<AnalysisSample, ErrorResponse>> ValidateSampleCode(int barCode);
         Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableQCTestsByRoutineBatchId(int routineBatchId);
         Task<ExternalResponse<List<TaskForPerform>, ErrorResponse>> GetForPerformTask(int[] sampleMethodIds);
