@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using Entities;
 using LabsoftAPI;
@@ -396,13 +397,16 @@ namespace Services {
                 }
                 else
                 {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
                     return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error",
+                            ErrorDescription = match.Groups[1].Value.Trim(),
                             Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
                                 new Exception(json) : null
                         }
@@ -450,13 +454,16 @@ namespace Services {
                 }
                 else
                 {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
                     return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
                             Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
                                 new Exception(json) : null
                         }
