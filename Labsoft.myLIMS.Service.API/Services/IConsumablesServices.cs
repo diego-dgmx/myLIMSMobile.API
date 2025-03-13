@@ -16,7 +16,9 @@ namespace Services {
         Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetConsumablesByConsumableTypeId(int consumableTypeId);
         Task<ExternalResponse<dynamic, ErrorResponse>> SetConsumptionInAnalysis(ConsumableConsumptionInAnalysisDTO body);
         Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
-            string? identityCenterToken, int consumableId, int movementId, InactivateMovementDTO body);
+            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body);
+        Task<ExternalResponse<string, ErrorResponse>> ActivateMovement(
+            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body);
         Task<ExternalResponse<dynamic, ErrorResponse>> CreateConsumableSample(CreateConsumableSampleDTO body);
     }
 }

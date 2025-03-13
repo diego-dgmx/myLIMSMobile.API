@@ -368,8 +368,62 @@ namespace Services {
             }
         }
 
+        public async Task<ExternalResponse<string, ErrorResponse>> ActivateMovement(
+            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PutAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{consumableId}/Movements/{movementId}/Activate", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<string, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
         public async Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
-            string? identityCenterToken, int consumableId, int movementId, InactivateMovementDTO body)
+            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body)
         {
             try
             {

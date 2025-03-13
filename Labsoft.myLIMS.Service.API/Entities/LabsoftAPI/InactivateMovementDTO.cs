@@ -1,6 +1,6 @@
 namespace LabsoftAPI
 {
-    public class InactivateMovementDTO
+    public class UpdateMovementDTO
     {
         public required string Notes { get; set; }
     }
