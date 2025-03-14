@@ -7,6 +7,7 @@ namespace Services {
             string? identityCenterToken, int? top = null, int? skip = null, string? filter = null, string? orderBy = null);
         Task<ExternalResponse<ConsumableBasic, ErrorResponse>> GetConsumable(
             string? identityCenterToken, int id);
+        Task<ExternalResponse<List<ConsumableInfoBasic>, ErrorResponse>> GetConsumableInfos(int id);
         Task<ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>> GetConsumableMovements(
             string? identityCenterToken, int id);
         Task<ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>> GetConsumableServiceAreas(

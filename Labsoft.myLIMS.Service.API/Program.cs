@@ -80,6 +80,7 @@ builder.Services.AddScoped<IMethodsServices, MethodsServices>();
 builder.Services.AddScoped<IConsumablesServices, ConsumablesServices>();
 builder.Services.AddScoped<IConsumableTypesServices, ConsumableTypesServices>();
 builder.Services.AddScoped<IEquipmentsServices, EquipmentsServices>();
+builder.Services.AddScoped<IEquipmentTypesServices, EquipmentTypesServices>();
 builder.Services.AddScoped<IQCTestsServices, QCTestsServices>();
 builder.Services.AddScoped<IMessagesServices, MessagesServices>();
 builder.Services.AddScoped<IFilesServices, FilesServices>();
@@ -88,6 +89,7 @@ builder.Services.AddScoped<ISystemConfigsServices, SystemConfigsServices>();
 builder.Services.AddScoped<IScheduleInterventionsServices, ScheduleInterventionsServices>();
 builder.Services.AddScoped<IServiceAreasServices, ServiceAreasServices>();
 builder.Services.AddScoped<IServiceCentersServices, ServiceCentersServices>();
+builder.Services.AddScoped<IInfosServices, InfosServices>();
 
 var app = builder.Build();
 

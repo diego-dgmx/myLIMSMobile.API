@@ -255,6 +255,34 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("{id}/Infos")]
+        public async Task<ActionResult<ResponseBase<List<ConsumableInfoBasic>>>> GetConsumableInfos(int id)
+        {
+            var response = await _consumablesServices.GetConsumableInfos(id);
+            
+            if(response.StatusCode == 200)
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<List<ConsumableInfoBasic>>
+                {
+                    Data = response.Success
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("{consumableTypeId}/ByConsumableTypeId")]
         public async Task<ActionResult<ResponseBase<List<SimpleConsumableBasic>>>> ByConsumableTypeId(int consumableTypeId)
         {
