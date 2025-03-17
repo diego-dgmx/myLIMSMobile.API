@@ -224,6 +224,65 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpGet("{id}/ServiceCenters")]
+        public async Task<ActionResult<ResponseBase<List<ConsumableServiceCenterBasic>>>> GetConsumableServiceCenters(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.GetConsumableServiceCenters(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<ConsumableServiceCenterBasic>>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}/Infos")]
+        public async Task<ActionResult<ResponseBase<List<ConsumableInfoBasic>>>> GetConsumableInfos(int id)
+        {
+            var response = await _consumablesServices.GetConsumableInfos(id);
+            
+            if(response.StatusCode == 200)
+            {
+                return StatusCode(response.StatusCode, new ResponseBase<List<ConsumableInfoBasic>>
+                {
+                    Data = response.Success
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("{consumableTypeId}/ByConsumableTypeId")]
         public async Task<ActionResult<ResponseBase<List<SimpleConsumableBasic>>>> ByConsumableTypeId(int consumableTypeId)
         {
@@ -285,9 +344,41 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpPut("{consumableId}/Movements/{movementId}/Activate")]
+        public async Task<ActionResult<ResponseBase<string>>> ActivateMovement(
+            int consumableId, int movementId, [FromBody] UpdateMovementDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _consumablesServices.ActivateMovement(identityCenterToken, consumableId, movementId, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<string>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpPut("{consumableId}/Movements/{movementId}/Inactivate")]
         public async Task<ActionResult<ResponseBase<string>>> InactivateMovement(
-            int consumableId, int movementId, [FromBody] InactivateMovementDTO body)
+            int consumableId, int movementId, [FromBody] UpdateMovementDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
             var response = await _consumablesServices.InactivateMovement(identityCenterToken, consumableId, movementId, body);

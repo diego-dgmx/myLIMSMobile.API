@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using Entities;
 using LabsoftAPI;
@@ -284,10 +285,10 @@ namespace Services {
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceAreas");
 
                 var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceAreaBasic>>(json);
             
                 if(response.IsSuccessStatusCode)
                 {
+                    var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceAreaBasic>>(json);
                     return new ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
@@ -322,8 +323,111 @@ namespace Services {
             }
         }
 
+        public async Task<ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>> GetConsumableServiceCenters(string? identityCenterToken, int id)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceCenters");
+
+                var json = await response.Content.ReadAsStringAsync();
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    var myLIMSResponse = JsonConvert.DeserializeObject<List<ConsumableServiceCenterBasic>>(json);
+                    return new ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<string, ErrorResponse>> ActivateMovement(
+            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PutAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{consumableId}/Movements/{movementId}/Activate", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<string, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<string, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
         public async Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
-            string? identityCenterToken, int consumableId, int movementId, InactivateMovementDTO body)
+            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body)
         {
             try
             {
@@ -350,13 +454,16 @@ namespace Services {
                 }
                 else
                 {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
                     return new ExternalResponse<string, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
-                            ErrorDescription = "request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
                             Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
                                 new Exception(json) : null
                         }
@@ -416,6 +523,53 @@ namespace Services {
             }
             catch(Exception ex) {
                 return new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<List<ConsumableInfoBasic>, ErrorResponse>> GetConsumableInfos(int id)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+
+                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Consumables/{id}/infos?&top=1000");
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<ConsumableInfoBasic>>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<List<ConsumableInfoBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.Result
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<List<ConsumableInfoBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<List<ConsumableInfoBasic>, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{

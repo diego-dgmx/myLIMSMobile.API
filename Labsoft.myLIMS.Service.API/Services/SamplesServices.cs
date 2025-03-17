@@ -415,13 +415,91 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken)
+        public async Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken, string? methodMasterIds = null, string? sampleTypeIds = null, string? methodStatusIds = null, string? serviceAreaIds = null, string? sampleReasonIds = null, string? workIds = null, string? startUserIds = null, string? collectPointIds = null, string? qcTestIds = null, string? sampleIds = null, string? sampleIdentification = null, string? sampleControlNumber = null, string? validityStartDateTime = null, string? validityEndDateTime = null, string? executionStartDateTime = null, string? executionEndDateTime = null, string? conclusionStartDateTime = null, string? conclusionEndDateTime = null, string? receivedStartDateTime = null, string? receivedEndDateTime = null, string? startStartDateTime = null, string? startEndDateTime = null, string? takenStartDateTime = null, string? takenEndDateTime = null)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodsCount");
 
-                var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodsCount");
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+                if(!methodMasterIds.IsNullOrEmpty()) {
+                    query["MethodMasterIds"] = methodMasterIds;
+                }
+                if(!sampleTypeIds.IsNullOrEmpty()) {
+                    query["SampleTypeIds"] = sampleTypeIds;
+                }
+                if(!methodStatusIds.IsNullOrEmpty()) {
+                    query["MethodStatusIds"] = methodStatusIds;
+                }
+                if(!serviceAreaIds.IsNullOrEmpty()) {
+                    query["ServiceAreaIds"] = serviceAreaIds;
+                }
+                if(!sampleReasonIds.IsNullOrEmpty()) {
+                    query["SampleReasonIds"] = sampleReasonIds;
+                }
+                if(!workIds.IsNullOrEmpty()) {
+                    query["WorkIds"] = workIds;
+                }
+                if(!startUserIds.IsNullOrEmpty()) {
+                    query["StartUserIds"] = startUserIds;
+                }
+                if(!collectPointIds.IsNullOrEmpty()) {
+                    query["CollectPointIds"] = collectPointIds;
+                }
+                if(!qcTestIds.IsNullOrEmpty()) {
+                    query["QcTestIds"] = qcTestIds;
+                }
+                if(!sampleIds.IsNullOrEmpty()) {
+                    query["SampleIds"] = sampleIds;
+                }
+                if(!sampleIdentification.IsNullOrEmpty()) {
+                    query["SampleIdentification"] = sampleIdentification;
+                }
+                if(!sampleControlNumber.IsNullOrEmpty()) {
+                    query["SampleControlNumber"] = sampleControlNumber;
+                }
+                if(!validityStartDateTime.IsNullOrEmpty()) {
+                    query["ValidityStartDateTime"] = validityStartDateTime;
+                }
+                if(!validityEndDateTime.IsNullOrEmpty()) {
+                    query["ValidityEndDateTime"] = validityEndDateTime;
+                }
+                if(!executionStartDateTime.IsNullOrEmpty()) {
+                    query["ExecutionStartDateTime"] = executionStartDateTime;
+                }
+                if(!executionEndDateTime.IsNullOrEmpty()) {
+                    query["ExecutionEndDateTime"] = executionEndDateTime;
+                }
+                if(!conclusionStartDateTime.IsNullOrEmpty()) {
+                    query["ConclusionStartDateTime"] = conclusionStartDateTime;
+                }
+                if(!conclusionEndDateTime.IsNullOrEmpty()) {
+                    query["ConclusionEndDateTime"] = conclusionEndDateTime;
+                }
+                if(!receivedStartDateTime.IsNullOrEmpty()) {
+                    query["ReceivedStartDateTime"] = receivedStartDateTime;
+                }
+                if(!receivedEndDateTime.IsNullOrEmpty()) {
+                    query["ReceivedEndDateTime"] = receivedEndDateTime;
+                }
+                if(!startStartDateTime.IsNullOrEmpty()) {
+                    query["StartStartDateTime"] = startStartDateTime;
+                }
+                if(!startEndDateTime.IsNullOrEmpty()) {
+                    query["StartEndDateTime"] = startEndDateTime;
+                }
+                if(!takenStartDateTime.IsNullOrEmpty()) {
+                    query["TakenStartDateTime"] = takenStartDateTime;
+                }
+                if(!takenEndDateTime.IsNullOrEmpty()) {
+                    query["TakenEndDateTime"] = takenEndDateTime;
+                }
+
+                uriBuilder.Query = query.ToString();
+
+                var response = await _httpClient.GetAsync(uriBuilder.ToString());
 
                 var json = await response.Content.ReadAsStringAsync();
                 var myLIMSResponse = JsonConvert.DeserializeObject<SampleMethodsCount>(json);

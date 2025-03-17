@@ -483,6 +483,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] collectionPoints,
             [FromQuery] int[] sampleReasons,
             [FromQuery] int[] sampleActivities,
+            [FromQuery] DateTime? priorityStartDate,
+            [FromQuery] DateTime? priorityEndDate,
             [FromQuery] DateTime? validityStartDate,
             [FromQuery] DateTime? validityEndDate,
             [FromQuery] DateTime? executionStartDate,
@@ -494,159 +496,136 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] DateTime? startStartDate,
             [FromQuery] DateTime? startEndDate,
             [FromQuery] DateTime? collectStartDate,
-            [FromQuery] DateTime? collectEndDate,
-            [FromQuery] bool useFilters = true)
+            [FromQuery] DateTime? collectEndDate)
         {
+            string? strMethodMasterIds = string.Empty;
+            string? strSampleTypeIds = string.Empty;
+            string? strMethodStatusIds = string.Empty;
+            string? strServiceAreaIds = string.Empty;
+            string? strSampleReasonIds = string.Empty;
+            string? strWorkIds = string.Empty;
+            string? strStartUserIds = string.Empty;
+            string? strCollectPointIds = string.Empty;
+            string? strQcTestIds = string.Empty;
+            string? strSampleIds = string.Empty;
+            string? strSampleIdetification = string.Empty;
+            string? strSampleControlNumber = string.Empty;
+            string? strValidityStartDateTime = string.Empty;
+            string? strValidityEndDateTime = string.Empty;
+            string? strExecutionStartDateTime = string.Empty;
+            string? strExecutionEndDateTime = string.Empty;
+            string? strConclusionStartDateTime = string.Empty;
+            string? strConclusionEndDateTime = string.Empty;
+            string? strReceivedStartDateTime = string.Empty;
+            string? strReceivedEndDateTime = string.Empty;
+            string? strStartStartDateTime = string.Empty;
+            string? strStartEndDateTime = string.Empty;
+            string? strTakenStartDateTime = string.Empty;
+            string? strTakenEndDateTime = string.Empty;
+
+            if(!sampleIds.IsNullOrEmpty()) {
+                strSampleIds = string.Join(",", sampleIds);
+            }
+
+            if(!sampleIdentifications.IsNullOrEmpty()) {
+                strSampleIdetification = string.Join(",", sampleIdentifications);
+            }
+
+            if(!methodIds.IsNullOrEmpty()) {
+                strMethodMasterIds = string.Join(",", methodIds);
+            }
+
+            if(!stageIds.IsNullOrEmpty()) {
+                strMethodStatusIds = string.Join(",", stageIds);
+            }
+
+            if(!serviceAreaIds.IsNullOrEmpty()) {
+                strServiceAreaIds = string.Join(",", serviceAreaIds);
+            }
+
+            if(!sampleTypeIds.IsNullOrEmpty()) {
+                strSampleTypeIds = string.Join(",", sampleTypeIds);
+            }
+
+            if(!startUserIds.IsNullOrEmpty()) {
+                strStartUserIds = string.Join(",", startUserIds);
+            }
+
+            if(!batchNumbers.IsNullOrEmpty()) {
+                strQcTestIds = string.Join(",", batchNumbers);
+            }
+
+            if(!customValues.IsNullOrEmpty()) {
+                // 
+            }
+
+            if(!sampleNumbers.IsNullOrEmpty()) {
+                strSampleControlNumber = string.Join(",", sampleNumbers);
+            }
+
+            if(!collectionPoints.IsNullOrEmpty()) {
+                strCollectPointIds = string.Join(",", collectionPoints);
+            }
+
+            if(!sampleReasons.IsNullOrEmpty()) {
+                strSampleReasonIds = string.Join(",", sampleReasons);
+            }
+
+            if(!sampleActivities.IsNullOrEmpty()) {
+                strWorkIds = string.Join(",", sampleActivities);
+            }
+
+            if(priorityStartDate != null) {
+                // 
+            }
+
+            if(validityStartDate != null) {
+                strValidityStartDateTime = validityStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                strValidityEndDateTime = validityEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            if(executionStartDate != null) {
+                strExecutionStartDateTime = executionStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                strExecutionEndDateTime = executionEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            if(conclusionStartDate != null) {
+                strConclusionStartDateTime = conclusionStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                strConclusionEndDateTime = conclusionEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            if(receiptStartDate != null) {
+                strReceivedStartDateTime = receiptStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                strReceivedEndDateTime = receiptEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            if(startStartDate != null) {
+                strStartStartDateTime = startStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                strStartEndDateTime = startEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
+            if(collectStartDate != null) {
+                strTakenStartDateTime = collectStartDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+                strTakenEndDateTime = collectEndDate?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+            }
+
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            dynamic response = useFilters ?
-                await _samplesServices.GetAllSamples() :
-                await _samplesServices.GetSampleMethodsCount(identityCenterToken);
+            dynamic response = await _samplesServices.GetSampleMethodsCount(identityCenterToken, strMethodMasterIds, strSampleTypeIds, strMethodStatusIds, strServiceAreaIds, strSampleReasonIds, strWorkIds, strStartUserIds, strCollectPointIds, strQcTestIds, strSampleIds, strSampleIdetification, strSampleControlNumber, strValidityStartDateTime, strValidityEndDateTime, strExecutionStartDateTime, strExecutionEndDateTime, strConclusionStartDateTime, strConclusionEndDateTime, strReceivedStartDateTime, strReceivedEndDateTime, strStartStartDateTime, strStartEndDateTime, strTakenStartDateTime, strTakenEndDateTime);
             
             if(response.StatusCode == 200)
             {
-                if(useFilters)
+                var results = response.Success as SampleMethodsCount;
+                return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
                 {
-                    var results = (response.Success as MyLIMSResponseBase<AnalysisSample>)?.Result ?? [];
-
-                    if(!sampleIds.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleIds.ToList()
-                            .Contains(item.Sample?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleIdentifications.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleIdentifications.ToList()
-                            .Any(identification => (item.Sample?.Identification ?? "")
-                                .Contains(identification, StringComparison.OrdinalIgnoreCase)))
-                                    .ToList();
-                    }
-
-                    if(!methodIds.IsNullOrEmpty()) {
-                        results = results.Where(item => methodIds.ToList()
-                            .Contains(item.Method?.MasterId ?? 0)).ToList();
-                    }
-
-                    if(!stageIds.IsNullOrEmpty()) {
-                        results = results.Where(item => stageIds.ToList()
-                            .Contains(item.CurrentStatus?.MethodStatus?.Id ?? 0)).ToList();
-                    }
-
-                    if(!serviceAreaIds.IsNullOrEmpty()) {
-                        results = results.Where(item => serviceAreaIds.ToList()
-                            .Contains(item.ServiceArea?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleTypeIds.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleTypeIds.ToList()
-                            .Contains(item?.Sample?.SampleType?.Id ?? 0)).ToList();
-                    }
-
-                    if(!startUserIds.IsNullOrEmpty()) {
-                        results = results.Where(item => startUserIds.ToList()
-                            .Contains(item?.CurrentStatus?.StartUser?.Id ?? 0)).ToList();
-                    }
-
-                    if(!batchNumbers.IsNullOrEmpty()) {
-                        results = results.Where(item => (item.QCTests ?? [])
-                            .Any(q => batchNumbers.Contains(q.QCTest.Number ?? 0))).ToList();
-                    }
-
-                    if(!customValues.IsNullOrEmpty()) {
-                        results = results.Where(item => customValues.ToList()
-                            .Any(value => (item.SampleCustomInfo?.DisplayValue ?? "")
-                                .Contains(value, StringComparison.OrdinalIgnoreCase)))
-                                    .ToList();
-                    }
-                                    
-                    if(!sampleNumbers.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleNumbers.ToList()
-                                .Contains(item?.Sample?.ControlNumber ?? "")).ToList();
-                    }
-
-                    if(!collectionPoints.IsNullOrEmpty()) {
-                        results = results.Where(item => collectionPoints.ToList()
-                                .Contains(item?.Sample?.CollectionPoint?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleReasons.IsNullOrEmpty()) {
-                        results = results.Where(item => sampleReasons.ToList()
-                                .Contains(item?.Sample?.SampleReason?.Id ?? 0)).ToList();
-                    }
-
-                    if(!sampleActivities.IsNullOrEmpty()) {
-                        results = results.Where(item => (item.Sample?.SampleWorks ?? [])
-                                .Any(q => sampleActivities.Contains(q.Work?.Id ?? 0))).ToList();
-                    }
-
-                    if(validityStartDate != null) {
-                        results = results.Where(
-                            item => item.AnalysisDeadline >= validityStartDate &&
-                            item.AnalysisDeadline <= validityEndDate).ToList();
-                    }
-
-                    if(executionStartDate != null) {
-                        results = results.Where(
-                            item => item.CurrentStatus?.ExecuteDateTime >= executionStartDate &&
-                            item.CurrentStatus.ExecuteDateTime <= executionEndDate).ToList();
-                    }
-
-                    if(conclusionStartDate != null) {
-                        results = results.Where(
-                            item => item.Conclusion >= conclusionStartDate &&
-                            item.Conclusion <= conclusionEndDate).ToList();
-                    }
-
-                    if(receiptStartDate != null) {
-                        results = results.Where(
-                            item => item.Sample?.ReceivedTime >= receiptStartDate &&
-                            item.Sample.ReceivedTime <= receiptEndDate).ToList();
-                    }
-
-                    if(startStartDate != null) {
-                        results = results.Where(
-                            item => item.CurrentStatus?.StartDateTime >= startStartDate &&
-                            item.CurrentStatus.StartDateTime <= startEndDate).ToList();
-                    }
-
-                    if(collectStartDate != null) {
-                        results = results.Where(
-                            item => item.Sample?.TakenDateTime >= collectStartDate &&
-                            item.Sample.TakenDateTime <= collectEndDate).ToList();
-                    }
-
-                    return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
+                    Ok = response.Success != null,
+                    Data = new SamplesSummary
                     {
-                        Ok = response.Success != null,
-                        Data = new SamplesSummary
-                        {
-                            PrepareAnalysis = results.Where(item =>
-                                item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.prepareAnalysis)
-                                .Select(item => item.Sample!).Count(),
-                            CarriedOutAnalysis = results.Where(item =>
-                                item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.carriedOutAnalysis)
-                                .Select(item => item.Sample!).Count(),
-                            ReviewAnalysis = results.Where(item =>
-                                item?.CurrentStatus?.MethodStatus?.MethodStatusBehaviorId == (int) SampleType.reviewAnalysis)
-                                .Select(item => item.Sample!).Count(),
-                            BatchQC = results.SelectMany(item => item.QCTests!)
-                                .Select(subItem => subItem.QCTest).Count()
-                        }
-                    });
-                }
-                else
-                {
-                    var results = response.Success as SampleMethodsCount;
-                    return StatusCode(response.StatusCode, new ResponseBase<SamplesSummary>
-                    {
-                        Ok = response.Success != null,
-                        Data = new SamplesSummary
-                        {
-                            PrepareAnalysis = results?.SampleMethodsToPrepareCount ?? 0,
-                            CarriedOutAnalysis = results?.SampleMethodsToExecuteCount ?? 0,
-                            ReviewAnalysis = results?.SampleMethodsToReviewCount ?? 0,
-                            BatchQC = results?.AvaliableQcTestsCount ?? 0
-                        }
-                    });
-                }
+                        PrepareAnalysis = results?.SampleMethodsToPrepareCount ?? 0,
+                        CarriedOutAnalysis = results?.SampleMethodsToExecuteCount ?? 0,
+                        ReviewAnalysis = results?.SampleMethodsToReviewCount ?? 0,
+                        BatchQC = results?.AvaliableQcTestsCount ?? 0
+                    }
+                });
             }
             else
             {

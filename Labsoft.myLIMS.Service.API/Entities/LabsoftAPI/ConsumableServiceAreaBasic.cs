@@ -2,8 +2,6 @@ namespace LabsoftAPI {
     public class ConsumableServiceAreaBasic
     {
         public int? Id { get; set; }
-        public int? ConsumableId { get; set; }
-        public int? ServiceAreaId { get; set; }
         public ServiceAreaBasic? ServiceArea { get; set; }
     }
 
@@ -23,13 +21,5 @@ namespace LabsoftAPI {
         public SingleData? EditionUser { get; set; }
         public DateTime? EditionDateTime { get; set; }
         public ServiceCenterBasic? ServiceCenter { get; set; }
-    }
-
-    public class ServiceCenterBasic
-    {
-        public int? Id { get; set; }
-        public string? Identification { get; set; }
-        public bool? Active { get; set; }
-        public List<SingleData>? PriceList { get; set; }
     }
 }

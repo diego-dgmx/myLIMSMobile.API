@@ -11,42 +11,24 @@ namespace Labsoft.myLIMS.Service.API.Controllers
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class ScheduleInterventionsController(IScheduleInterventionsServices scheduleInterventionsServices, ILogger<ScheduleInterventionsController> logger) : ControllerBase
+    public class InfosController(IInfosServices infosServices, ILogger<InfosController> logger) : ControllerBase
     {
-        private readonly IScheduleInterventionsServices _scheduleInterventionsServices = scheduleInterventionsServices;
-        private readonly ILogger<ScheduleInterventionsController> _logger = logger;
-
-        private enum ScheduleInterventionsSortParam
-        {
-            equipmentType,
-            identification
-        }
+        private readonly IInfosServices _infosServices = infosServices;
+        private readonly ILogger<InfosController> _logger = logger;
 
         [HttpGet]
-        public async Task<ActionResult<ResponseBase<Pagination<ScheduleInterventionBasic>>>> Get(
-            [FromQuery] string? sortParam,
-            [FromQuery] int[] equipmentTypeIds,
+        public async Task<ActionResult<ResponseBase<InfoBasic>>> Get(
+            [FromQuery] int[] infoIds,
             [FromQuery] string[] identifications,
             [FromQuery] int perPage = 10,
             [FromQuery] int page = 1)
         {
-            if (Enum.TryParse<ScheduleInterventionsSortParam>(sortParam, out var param)) {
-                switch(param) {
-                    case ScheduleInterventionsSortParam.equipmentType:
-                        sortParam = "Equipment/EquipmentType/Identification";
-                        break;
-                    case ScheduleInterventionsSortParam.identification:
-                        sortParam = "Identification";
-                        break;
-                }
-            }
-
             string filter = "";
 
-            if(!equipmentTypeIds.IsNullOrEmpty()) {
+            if(!infoIds.IsNullOrEmpty()) {
                 List<string> values = [];
-                foreach(int id in equipmentTypeIds) {
-                    values.Add($"Equipment/EquipmentType/Id eq {id}");
+                foreach(int id in infoIds) {
+                    values.Add($"Id eq {id}");
                 }
 
                 filter += $"({string.Join(" or ", values)}) and ";
@@ -65,21 +47,19 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 filter = filter[..^5];
             }
 
-            var response = await _scheduleInterventionsServices.GetScheduleInterventions(sortParam, filter,  perPage, (page - 1) * perPage);
-            
+            var response = await _infosServices.GetInfos(perPage, (page - 1) * perPage, filter);
+
             if(response.StatusCode == 200)
             {
-                var results = response.Success?.Result ?? [];
-
-                return StatusCode(response.StatusCode, new ResponseBase<Pagination<ScheduleInterventionBasic>>
+                return StatusCode(response.StatusCode, new ResponseBase<Pagination<InfoBasic>>
                 {
-                    Data = new Pagination<ScheduleInterventionBasic>
+                    Data = new Pagination<InfoBasic>
                     {
                         CurrentPage = page,
                         PerPage = perPage,
                         TotalPages = (int) Math.Ceiling((double) (response.Success?.TotalCount ?? 0) / perPage),
                         TotalItems = response.Success?.TotalCount ?? 0,
-                        Items = results
+                        Items = response.Success?.Result ?? []
                     }
                 });
             }
