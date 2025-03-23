@@ -98,5 +98,129 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpGet("{id}/Specifications")]
+        public async Task<ActionResult<ResponseBase<List<ScheduleSpecificationBasic>>>> GetScheduleSpecifications(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleSpecifications(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<ScheduleSpecificationBasic>>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}/ControlPlan")]
+        public async Task<ActionResult<ResponseBase<ScheduleControlPlanBasic>>> GetScheduleControlPlan(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleControlPlan(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<ScheduleControlPlanBasic>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}/AnalysisGroups")]
+        public async Task<ActionResult<ResponseBase<List<ScheduleAnalysisGroupBasic>>>> GetScheduleAnalysisGroups(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleAnalysisGroups(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<ScheduleAnalysisGroupBasic>>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}/Interventions")]
+        public async Task<ActionResult<ResponseBase<List<ScheduleSampleInterventionBasic>>>> GetScheduleSampleInterventions(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleSampleInterventions(identityCenterToken, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<ScheduleSampleInterventionBasic>>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }

@@ -2,7 +2,6 @@ namespace LabsoftAPI
 {
     public class ScheduleInterventionBasic
     {
-    
         public int? Id { get; set; }
         public string? Identification { get; set; }
         public InterventionType? InterventionType { get; set; }
