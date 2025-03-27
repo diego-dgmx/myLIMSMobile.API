@@ -13,11 +13,13 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<List<ScheduleAnalysisGroupBasic>, ErrorResponse>> GetScheduleAnalysisGroups(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<List<ScheduleAnalysisGroupBasic>, ErrorResponse>> GetScheduleAnalysisGroups(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/{id}/AnalysisGroup");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -59,11 +61,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<ScheduleControlPlanBasic, ErrorResponse>> GetScheduleControlPlan(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<ScheduleControlPlanBasic, ErrorResponse>> GetScheduleControlPlan(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/{id}/ControlPlans");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -176,11 +180,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<ScheduleSampleInterventionBasic>, ErrorResponse>> GetScheduleSampleInterventions(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<List<ScheduleSampleInterventionBasic>, ErrorResponse>> GetScheduleSampleInterventions(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/{id}/Interventions");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -222,11 +228,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<ScheduleSpecificationBasic>, ErrorResponse>> GetScheduleSpecifications(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<List<ScheduleSpecificationBasic>, ErrorResponse>> GetScheduleSpecifications(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/{id}/Specifications");
 
                 var json = await response.Content.ReadAsStringAsync();

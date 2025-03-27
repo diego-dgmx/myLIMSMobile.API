@@ -103,7 +103,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ScheduleSpecificationBasic>>>> GetScheduleSpecifications(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _scheduleInterventionsServices.GetScheduleSpecifications(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleSpecifications(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -134,7 +135,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<ScheduleControlPlanBasic>>> GetScheduleControlPlan(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _scheduleInterventionsServices.GetScheduleControlPlan(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleControlPlan(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -165,7 +167,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ScheduleAnalysisGroupBasic>>>> GetScheduleAnalysisGroups(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _scheduleInterventionsServices.GetScheduleAnalysisGroups(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleAnalysisGroups(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -196,7 +199,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ScheduleSampleInterventionBasic>>>> GetScheduleSampleInterventions(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _scheduleInterventionsServices.GetScheduleSampleInterventions(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleSampleInterventions(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {

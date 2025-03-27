@@ -27,7 +27,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             var response = await _authServices.Login(body.Username, body.Password, body.RefreshToken);
 
             if(response.StatusCode == 200) {
-                response.Success!.AccessToken = GenerateJwtToken(response.Success.AccessToken ?? "");
+                response.Success!.AccessToken = GenerateJwtToken(response.Success.AccessToken ?? "", "produto"); //TODO: set company from request
             }
             else {
                 LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
@@ -123,7 +123,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        private string GenerateJwtToken(string identity)
+        private string GenerateJwtToken(string identity, string company)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"] ?? ""));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -131,6 +131,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             var claims = new[]
             {
                 new Claim("nested_jwt", identity),
+                new Claim("nested_company", company),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

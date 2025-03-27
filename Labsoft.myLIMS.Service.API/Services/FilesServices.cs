@@ -58,11 +58,12 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<UploadFileResponse, ErrorResponse>> UploadFile(
-            string? identityCenterToken, IFormFile? file)
+            string? identityCenterToken, string? identityCompany, IFormFile? file)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
 
                 if (file == null && file!.Length == 0)
                 {

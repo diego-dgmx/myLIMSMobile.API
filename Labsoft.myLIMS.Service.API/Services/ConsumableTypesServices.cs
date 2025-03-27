@@ -10,11 +10,13 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<List<ConsumableTypeBasic>, ErrorResponse>> GetConsumableTypes(string? identityCenterToken)
+        public async Task<ExternalResponse<List<ConsumableTypeBasic>, ErrorResponse>> GetConsumableTypes(string? identityCenterToken, string? identityCompany)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/ConsumableTypes?$top=1000");
 
                 var json = await response.Content.ReadAsStringAsync();

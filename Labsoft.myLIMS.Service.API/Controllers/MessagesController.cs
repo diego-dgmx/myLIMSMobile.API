@@ -80,7 +80,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromBody] SendMessageWithEntitiesAttachedDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _messagesServices.SendMessage(identityCenterToken, body);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _messagesServices.SendMessage(identityCenterToken, identityCompany, body);
             
             if(response.StatusCode == 200)
             {

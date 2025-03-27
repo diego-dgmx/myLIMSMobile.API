@@ -19,7 +19,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<SampleRevisionBasic>>>> GetRevisions([FromQuery] int[] sampleAnalysisIds)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _sampleAnalysisServices.GetRevisions(identityCenterToken, sampleAnalysisIds);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _sampleAnalysisServices.GetRevisions(identityCenterToken, identityCompany, sampleAnalysisIds);
             
             if(response.StatusCode == 200)
             {

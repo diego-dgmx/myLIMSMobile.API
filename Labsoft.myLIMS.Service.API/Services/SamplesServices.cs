@@ -415,11 +415,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken, string? methodMasterIds = null, string? sampleTypeIds = null, string? methodStatusIds = null, string? serviceAreaIds = null, string? sampleReasonIds = null, string? workIds = null, string? startUserIds = null, string? collectPointIds = null, string? qcTestIds = null, string? sampleIds = null, string? sampleIdentification = null, string? sampleControlNumber = null, string? validityStartDateTime = null, string? validityEndDateTime = null, string? executionStartDateTime = null, string? executionEndDateTime = null, string? conclusionStartDateTime = null, string? conclusionEndDateTime = null, string? receivedStartDateTime = null, string? receivedEndDateTime = null, string? startStartDateTime = null, string? startEndDateTime = null, string? takenStartDateTime = null, string? takenEndDateTime = null)
+        public async Task<ExternalResponse<SampleMethodsCount, ErrorResponse>> GetSampleMethodsCount(string? identityCenterToken, string? identityCompany, string? methodMasterIds = null, string? sampleTypeIds = null, string? methodStatusIds = null, string? serviceAreaIds = null, string? sampleReasonIds = null, string? workIds = null, string? startUserIds = null, string? collectPointIds = null, string? qcTestIds = null, string? sampleIds = null, string? sampleIdentification = null, string? sampleControlNumber = null, string? validityStartDateTime = null, string? validityEndDateTime = null, string? executionStartDateTime = null, string? executionEndDateTime = null, string? conclusionStartDateTime = null, string? conclusionEndDateTime = null, string? receivedStartDateTime = null, string? receivedEndDateTime = null, string? startStartDateTime = null, string? startEndDateTime = null, string? takenStartDateTime = null, string? takenEndDateTime = null)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodsCount");
 
                 var query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -541,10 +543,12 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetForExecutionSamples(
-            string? identityCenterToken, int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null)
+            string? identityCenterToken, string? identityCompany, int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null)
         {
             try {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+                
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/ForExecution");
 
                 var query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -613,10 +617,12 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<SampleMethodFilterOptions, ErrorResponse>> GetFilterOptions(string? identityCenterToken)
+        public async Task<ExternalResponse<SampleMethodFilterOptions, ErrorResponse>> GetFilterOptions(string? identityCenterToken, string? identityCompany)
         {
             try {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleMethods/SampleMethodFilters");
 
                 var json = await response.Content.ReadAsStringAsync();

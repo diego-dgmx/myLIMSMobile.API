@@ -35,7 +35,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int page = 1)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _qcTestsServices.GetQCTests(identityCenterToken);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _qcTestsServices.GetQCTests(identityCenterToken, identityCompany);
             
             if(response.StatusCode == 200)
             {
@@ -117,7 +118,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<QCTest>>>> GetAvailableByQCRoutineBatchId([FromQuery] int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _qcTestsServices.GetAvailableByQCRoutineBatchId(id, identityCenterToken);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _qcTestsServices.GetAvailableByQCRoutineBatchId(id, identityCenterToken, identityCompany);
             
             if(response.StatusCode == 200)
             {
@@ -208,7 +210,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<QCTestLink>>>> GetLinkedSamplesByQCTestId([FromQuery] int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _qcTestsServices.GetLinkedSamplesByQCTestId(id, identityCenterToken);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _qcTestsServices.GetLinkedSamplesByQCTestId(id, identityCenterToken, identityCompany);
             
             if(response.StatusCode == 200)
             {
@@ -239,7 +242,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<QCTestLink>>>> GetControlSamplesByQCTestId([FromQuery] int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _qcTestsServices.GetControlSamplesByQCTestId(id, identityCenterToken);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _qcTestsServices.GetControlSamplesByQCTestId(id, identityCenterToken, identityCompany);
             
             if(response.StatusCode == 200)
             {
