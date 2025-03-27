@@ -65,11 +65,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<ConsumableBasic, ErrorResponse>> GetConsumable(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<ConsumableBasic, ErrorResponse>> GetConsumable(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -111,11 +113,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>> GetConsumableMovements(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<List<ConsumableMovementBasic>, ErrorResponse>> GetConsumableMovements(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+                
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/Movements?$top=1000");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -158,11 +162,12 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<MyLIMSResponseBase<ConsumableBasic>, ErrorResponse>> GetConsumables(
-            string? identityCenterToken, int? top = null, int? skip = null, string? filter = null, string? orderBy = null)
+            string? identityCenterToken, string? identityCompany, int? top = null, int? skip = null, string? filter = null, string? orderBy = null)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
                 
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables");
                 var query = HttpUtility.ParseQueryString(uriBuilder.Query);
@@ -277,11 +282,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>> GetConsumableServiceAreas(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>> GetConsumableServiceAreas(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceAreas");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -323,11 +330,13 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>> GetConsumableServiceCenters(string? identityCenterToken, int id)
+        public async Task<ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>> GetConsumableServiceCenters(string? identityCenterToken, string? identityCompany, int id)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables/{id}/ServiceCenters");
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -370,11 +379,12 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<string, ErrorResponse>> ActivateMovement(
-            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body)
+            string? identityCenterToken, string? identityCompany, int consumableId, int movementId, UpdateMovementDTO body)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
 
                 var content = new StringContent(
                     JsonConvert.SerializeObject(body),
@@ -427,11 +437,12 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(
-            string? identityCenterToken, int consumableId, int movementId, UpdateMovementDTO body)
+            string? identityCenterToken, string? identityCompany, int consumableId, int movementId, UpdateMovementDTO body)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
 
                 var content = new StringContent(
                     JsonConvert.SerializeObject(body),

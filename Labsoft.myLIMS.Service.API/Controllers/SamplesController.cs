@@ -610,7 +610,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
 
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            dynamic response = await _samplesServices.GetSampleMethodsCount(identityCenterToken, strMethodMasterIds, strSampleTypeIds, strMethodStatusIds, strServiceAreaIds, strSampleReasonIds, strWorkIds, strStartUserIds, strCollectPointIds, strQcTestIds, strSampleIds, strSampleIdetification, strSampleControlNumber, strValidityStartDateTime, strValidityEndDateTime, strExecutionStartDateTime, strExecutionEndDateTime, strConclusionStartDateTime, strConclusionEndDateTime, strReceivedStartDateTime, strReceivedEndDateTime, strStartStartDateTime, strStartEndDateTime, strTakenStartDateTime, strTakenEndDateTime);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            dynamic response = await _samplesServices.GetSampleMethodsCount(identityCenterToken, identityCompany, strMethodMasterIds, strSampleTypeIds, strMethodStatusIds, strServiceAreaIds, strSampleReasonIds, strWorkIds, strStartUserIds, strCollectPointIds, strQcTestIds, strSampleIds, strSampleIdetification, strSampleControlNumber, strValidityStartDateTime, strValidityEndDateTime, strExecutionStartDateTime, strExecutionEndDateTime, strConclusionStartDateTime, strConclusionEndDateTime, strReceivedStartDateTime, strReceivedEndDateTime, strStartStartDateTime, strStartEndDateTime, strTakenStartDateTime, strTakenEndDateTime);
             
             if(response.StatusCode == 200)
             {
@@ -884,9 +885,10 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                     filter = filter[..^5];
                 }
                 var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+                var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
                 ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse> response;
                 response = await _samplesServices.GetForExecutionSamples(
-                    identityCenterToken, (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
+                    identityCenterToken, identityCompany, (int) type, sortParam, filter,  perPage, (page - 1) * perPage);
 
                 if(response.StatusCode == 200)
                 {
@@ -1313,7 +1315,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<SampleMethodFilterOptions>>> GetFilterOptions()
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _samplesServices.GetFilterOptions(identityCenterToken);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _samplesServices.GetFilterOptions(identityCenterToken, identityCompany);
             
             if(response.StatusCode == 200)
             {

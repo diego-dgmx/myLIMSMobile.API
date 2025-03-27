@@ -66,7 +66,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
 
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumables(identityCenterToken, perPage, (page - 1) * perPage, filter, sortParam);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.GetConsumables(identityCenterToken, identityCompany, perPage, (page - 1) * perPage, filter, sortParam);
             
             if(response.StatusCode == 200)
             {
@@ -135,7 +136,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<ConsumableBasic>>> GetConsumable(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumable(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.GetConsumable(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -166,7 +168,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ConsumableMovementBasic>>>> GetConsumableMovements(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumableMovements(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.GetConsumableMovements(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -197,7 +200,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ConsumableServiceAreaBasic>>>> GetConsumableServiceAreas(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumableServiceAreas(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.GetConsumableServiceAreas(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -228,7 +232,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ConsumableServiceCenterBasic>>>> GetConsumableServiceCenters(int id)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.GetConsumableServiceCenters(identityCenterToken, id);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.GetConsumableServiceCenters(identityCenterToken, identityCompany, id);
             
             if(response.StatusCode == 200)
             {
@@ -349,7 +354,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             int consumableId, int movementId, [FromBody] UpdateMovementDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.ActivateMovement(identityCenterToken, consumableId, movementId, body);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.ActivateMovement(identityCenterToken, identityCompany, consumableId, movementId, body);
             
             if(response.StatusCode == 200)
             {
@@ -381,7 +387,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             int consumableId, int movementId, [FromBody] UpdateMovementDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumablesServices.InactivateMovement(identityCenterToken, consumableId, movementId, body);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.InactivateMovement(identityCenterToken, identityCompany, consumableId, movementId, body);
             
             if(response.StatusCode == 200)
             {

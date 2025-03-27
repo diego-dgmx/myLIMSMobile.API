@@ -10,11 +10,13 @@ namespace Services {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<List<SampleRevisionBasic>, ErrorResponse>> GetRevisions(string? identityCenterToken, int[] sampleAnalysisIds)
+        public async Task<ExternalResponse<List<SampleRevisionBasic>, ErrorResponse>> GetRevisions(string? identityCenterToken, string? identityCompany, int[] sampleAnalysisIds)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
                 var queryParams = sampleAnalysisIds.Select((value, index) => $"SampleAnalysisIds={value}").ToArray();
 
                 var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/SampleAnalysis/Revision?{string.Join("&", queryParams)}");

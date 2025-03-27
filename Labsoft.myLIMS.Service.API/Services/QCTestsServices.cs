@@ -118,11 +118,12 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableByQCRoutineBatchId(int id, string? identityCenterToken)
+        public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetAvailableByQCRoutineBatchId(int id, string? identityCenterToken, string? identityCompany)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
                 
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests/GetAvailableByQCRoutineBatchId");
 
@@ -172,11 +173,12 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<QCTestLink>, ErrorResponse>> GetControlSamplesByQCTestId(int id, string? identityCenterToken)
+        public async Task<ExternalResponse<List<QCTestLink>, ErrorResponse>> GetControlSamplesByQCTestId(int id, string? identityCenterToken, string? identityCompany)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
                 
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests/GetControlSamplesByQCTestId");
 
@@ -226,11 +228,12 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<QCTestLink>, ErrorResponse>> GetLinkedSamplesByQCTestId(int id, string? identityCenterToken)
+        public async Task<ExternalResponse<List<QCTestLink>, ErrorResponse>> GetLinkedSamplesByQCTestId(int id, string? identityCenterToken, string? identityCompany)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
                 
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests/GetLinkedSamplesByQCTestId");
 
@@ -280,11 +283,12 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetQCTests(string? identityCenterToken)
+        public async Task<ExternalResponse<List<QCTest>, ErrorResponse>> GetQCTests(string? identityCenterToken, string? identityCompany)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
                 
                 var uriBuilder = new UriBuilder($"{_settings.LabsoftMyLIMSApiURLBase}/v1/QCTests");
 

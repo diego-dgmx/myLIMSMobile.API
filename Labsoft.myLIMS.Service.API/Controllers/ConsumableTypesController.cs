@@ -19,7 +19,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<List<ConsumableTypeBasic>>>> GetConsumableTypes()
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _consumableTypesServices.GetConsumableTypes(identityCenterToken);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumableTypesServices.GetConsumableTypes(identityCenterToken, identityCompany);
             
             if(response.StatusCode == 200)
             {

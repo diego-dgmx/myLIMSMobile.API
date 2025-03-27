@@ -51,7 +51,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromForm] IFormFile file)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
-            var response = await _filesServices.UploadFile(identityCenterToken, file);
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _filesServices.UploadFile(identityCenterToken, identityCompany, file);
             
             if(response.StatusCode == 200)
             {

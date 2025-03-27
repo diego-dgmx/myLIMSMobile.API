@@ -106,11 +106,12 @@ namespace Services {
         }
 
         public async Task<ExternalResponse<dynamic, ErrorResponse>> SendMessage(
-            string? identityCenterToken, SendMessageWithEntitiesAttachedDTO body)
+            string? identityCenterToken, string? identityCompany, SendMessageWithEntitiesAttachedDTO body)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
 
                 var content = new StringContent(
                     JsonConvert.SerializeObject(body),
