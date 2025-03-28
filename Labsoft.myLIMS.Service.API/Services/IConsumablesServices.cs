@@ -20,6 +20,8 @@ namespace Services {
             string? identityCenterToken, string? identityCompany, int consumableId, int movementId, UpdateMovementDTO body);
         Task<ExternalResponse<string, ErrorResponse>> ActivateMovement(
             string? identityCenterToken, string? identityCompany, int consumableId, int movementId, UpdateMovementDTO body);
+        Task<ExternalResponse<dynamic, ErrorResponse>> RemoveStock(UpdateStockDTO body);
+        Task<ExternalResponse<dynamic, ErrorResponse>> AddStock(UpdateStockDTO body);
         Task<ExternalResponse<dynamic, ErrorResponse>> CreateConsumableSample(CreateConsumableSampleDTO body);
     }
 }
