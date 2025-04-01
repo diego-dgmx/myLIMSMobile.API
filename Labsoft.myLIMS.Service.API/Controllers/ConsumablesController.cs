@@ -349,6 +349,68 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [HttpPost("RemoveStock")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> RemoveStock(
+            [FromBody] UpdateStockDTO body)
+        {
+            var response = await _consumablesServices.RemoveStock(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("AddStock")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> AddStock(
+            [FromBody] UpdateStockDTO body)
+        {
+            var response = await _consumablesServices.RemoveStock(body);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpPut("{consumableId}/Movements/{movementId}/Activate")]
         public async Task<ActionResult<ResponseBase<string>>> ActivateMovement(
             int consumableId, int movementId, [FromBody] UpdateMovementDTO body)
