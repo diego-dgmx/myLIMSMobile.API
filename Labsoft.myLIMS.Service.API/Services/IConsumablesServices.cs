@@ -5,6 +5,10 @@ namespace Services {
     {
         Task<ExternalResponse<MyLIMSResponseBase<ConsumableBasic>, ErrorResponse>> GetConsumables(
             string? identityCenterToken, string? identityCompany, int? top = null, int? skip = null, string? filter = null, string? orderBy = null);
+        Task<ExternalResponse<int, ErrorResponse>> CreateConsumable(
+            string? identityCenterToken, string? identityCompany, ConsumableCreateDTO body);
+        Task<ExternalResponse<dynamic, ErrorResponse>> UpdateConsumable(
+            string? identityCenterToken, string? identityCompany, ConsumableUpdateDTO body);
         Task<ExternalResponse<ConsumableBasic, ErrorResponse>> GetConsumable(
             string? identityCenterToken, string? identityCompany, int id);
         Task<ExternalResponse<List<ConsumableInfoBasic>, ErrorResponse>> GetConsumableInfos(int id);

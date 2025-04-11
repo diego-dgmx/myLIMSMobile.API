@@ -693,5 +693,120 @@ namespace Services {
                 };
             }
         }
+
+        public async Task<ExternalResponse<int, ErrorResponse>> CreateConsumable(string? identityCenterToken, string? identityCompany, ConsumableCreateDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PostAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<InfoTypeBasic>(json);
+                Console.WriteLine(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.Id ?? 0
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<int, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> UpdateConsumable(string? identityCenterToken, string? identityCompany, ConsumableUpdateDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PutAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/Consumables", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
     }
 }
