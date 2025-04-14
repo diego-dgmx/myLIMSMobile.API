@@ -476,5 +476,69 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpPost("")]
+        public async Task<ActionResult<ResponseBase<int>>> CreateConsumable([FromBody] ConsumableCreateDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.CreateConsumable(identityCenterToken, identityCompany, body);
+            
+            if(response.StatusCode == 201)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<int>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<int>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPut("")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> UpdateConsumable([FromBody] ConsumableUpdateDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _consumablesServices.UpdateConsumable(identityCenterToken, identityCompany, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }

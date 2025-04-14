@@ -24,6 +24,8 @@ namespace LabsoftAPI {
         public double? Cost { get; set; }
         public DateTime? ExpireAfterOpen { get; set; }
         public bool? UseExpireAfterOpen { get; set; }
+        public bool? UnrestrictedAccessServiceArea { get; set; }
+        public bool? UnrestrictedAccessServiceCenter { get; set; }
         public int? SampleId { get; set; }
         public int? ConsumableTypeId { get; set; }
         public ConsumableTypeBasic? ConsumableType { get; set; }
