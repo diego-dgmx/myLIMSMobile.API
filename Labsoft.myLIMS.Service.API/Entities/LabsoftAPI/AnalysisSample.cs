@@ -4,7 +4,7 @@ namespace LabsoftAPI {
         public object? Complement { get; set; }
         public object? ReferenceKey { get; set; }
         public AccountType? AccountType { get; set; }
-        public object? PriceList { get; set; }
+        public PriceList? PriceList { get; set; }
         public bool? Active { get; set; }
         public bool? RelatedAccountRequired { get; set; }
         public object? RegistryNumber { get; set; }
