@@ -1251,16 +1251,16 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpPost("PerformTask")]
-        public async Task<ActionResult<ResponseBase<string>>> PerformTask([FromQuery] bool calculate, [FromBody] PerformTaskDTO body)
+        [HttpPost("PerformTasks")]
+        public async Task<ActionResult<ResponseBase<PerformedTasksBasic>>> PerformTasks([FromBody] PerformSampleMethodsDTO body)
         {
-            var response = await _samplesServices.PerformTask(calculate, body);
+            var response = await _samplesServices.PerformTasks(body);
             
             if(response.StatusCode == 200)
             {
                 var results = response.Success;
 
-                return StatusCode(response.StatusCode, new ResponseBase<string>
+                return StatusCode(response.StatusCode, new ResponseBase<PerformedTasksBasic>
                 {
                     Data = results
                 });

@@ -309,7 +309,7 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<string, ErrorResponse>> PerformTask(bool calculate, PerformTaskDTO body)
+        public async Task<ExternalResponse<PerformedTasksBasic, ErrorResponse>> PerformTasks(PerformSampleMethodsDTO body)
         {
             try
             {
@@ -321,14 +321,32 @@ namespace Services {
                 );
 
                 var response = await _httpClient.PostAsync(
-                    $"{_settings.MyLIMSApiURLBase}/v2/Samples/PerformTask?calculate={calculate}", content);
+                    $"{_settings.MyLIMSApiURLBase}/SampleMethodApi/PerformTasks", content);
 
                 var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
             
                 if(response.IsSuccessStatusCode)
                 {
-                    return new ExternalResponse<string, ErrorResponse>
+                    int completeIndex = json.IndexOf("COMPLETE:");
+
+                    if (completeIndex < 0)
+                    {
+                        return new ExternalResponse<PerformedTasksBasic, ErrorResponse>
+                        {
+                            StatusCode = (int) HttpStatusCode.Conflict,
+                            Error = new ErrorResponse
+                            {
+                                Error = "external_request_error",
+                                ErrorDescription = json
+                            }
+                        };
+                    }
+
+                    json = json[(completeIndex + 9)..];
+
+                    var myLIMSResponse = JsonConvert.DeserializeObject<PerformedTasksBasic>(json);
+
+                    return new ExternalResponse<PerformedTasksBasic, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Success = myLIMSResponse
@@ -336,7 +354,7 @@ namespace Services {
                 }
                 else
                 {
-                    return new ExternalResponse<string, ErrorResponse>
+                    return new ExternalResponse<PerformedTasksBasic, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
@@ -350,7 +368,7 @@ namespace Services {
                 }
             }
             catch(Exception ex) {
-                return new ExternalResponse<string, ErrorResponse>
+                return new ExternalResponse<PerformedTasksBasic, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
