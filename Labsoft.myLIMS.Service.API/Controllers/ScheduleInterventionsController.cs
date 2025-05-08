@@ -19,7 +19,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         private enum ScheduleInterventionsSortParam
         {
             equipmentType,
-            identification
+            identification,
+            nextIntervention
         }
 
         [HttpGet]
@@ -37,6 +38,9 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         break;
                     case ScheduleInterventionsSortParam.identification:
                         sortParam = "Identification";
+                        break;
+                    case ScheduleInterventionsSortParam.nextIntervention:
+                        sortParam = "NextIntervention";
                         break;
                 }
             }
@@ -81,6 +85,38 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         TotalItems = response.Success?.TotalCount ?? 0,
                         Items = results
                     }
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<ResponseBase<ScheduleInterventionBasic>>> GetScheduleIntervention(int id)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.GetScheduleIntervention(identityCenterToken, identityCompany, id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<ScheduleInterventionBasic>
+                {
+                    Data = result
                 });
             }
             else
@@ -215,6 +251,134 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             {
                 LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<ResponseBase<int>>> CreateScheduleIntervention([FromBody] ScheduleInterventionCreateDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.CreateScheduleIntervention(identityCenterToken, identityCompany, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(201, new ResponseBase<int>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<int>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult<ResponseBase<dynamic>>> UpdateScheduleIntervention([FromBody] ScheduleInterventionUpdateDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.UpdateScheduleIntervention(identityCenterToken, identityCompany, body);
+
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("ScheduleInterventionRoutine")]
+        public async Task<ActionResult<ResponseBase<int>>> CreateScheduleInterventionRoutine([FromBody] ScheduleInterventionDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.CreateScheduleInterventionRoutine(identityCenterToken, identityCompany, body);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(201, new ResponseBase<int>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<int>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPost("ScheduleInterventionExtraordinary")]
+        public async Task<ActionResult<ResponseBase<int>>> CreateScheduleInterventionExtraordinary([FromBody] ScheduleInterventionDTO body)
+        {
+            var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
+            var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
+            var response = await _scheduleInterventionsServices.CreateScheduleInterventionExtraordinary(identityCenterToken, identityCompany, body);
+
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(201, new ResponseBase<int>
+                {
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<int>
                 {
                     Ok = false,
                     Message = response.Error?.ErrorDescription,

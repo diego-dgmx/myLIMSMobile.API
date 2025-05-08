@@ -1,6 +1,6 @@
 using LabsoftAPI;
 
-namespace Services {
+namespace Interfaces {
     public interface IMeasurementUnitsServices
     {
         Task<ExternalResponse<List<MeasurementUnitBasic>, ErrorResponse>> GetMeasurementUnits();

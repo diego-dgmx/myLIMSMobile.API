@@ -4,36 +4,48 @@ using Entities;
 using Interfaces;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
-namespace Services {
-    public class EquipmentTypesServices(HttpClient httpClient, IOptions<ApiSettings> settings) : IEquipmentTypesServices
+namespace Services
+{
+    public class AccountsServices(HttpClient httpClient, IOptions<ApiSettings> settings) : IAccountsServices
     {
         private readonly HttpClient _httpClient = httpClient;
         private readonly ApiSettings _settings = settings.Value;
 
-        public async Task<ExternalResponse<List<EquipmentType>, ErrorResponse>> GetEquipmentTypes()
+        public async Task<ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>> GetAccounts(int? accountTypeId)
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/EquipmentTypes?$inlinecount=allpages");
+                var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/Accounts");
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+                query["$inlinecount"] = "allpages";
+                query["$filter"] = "Active eq true";
+
+                if(accountTypeId != null)
+                {
+                    query["$filter"] += $" and AccountType/Id eq {accountTypeId}";
+                }
+
+                uriBuilder.Query = query.ToString();
+
+                var response = await _httpClient.GetAsync(uriBuilder.ToString());
 
                 var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<EquipmentType>>(json);
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<Account>>(json);
 
                 if(response.IsSuccessStatusCode)
                 {
-                    return new ExternalResponse<List<EquipmentType>, ErrorResponse>
+                    return new ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
-                        Success = myLIMSResponse?.Result
+                        Success = myLIMSResponse
                     };
                 }
                 else
                 {
-                    return new ExternalResponse<List<EquipmentType>, ErrorResponse>
+                    return new ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
@@ -47,7 +59,7 @@ namespace Services {
                 }
             }
             catch(Exception ex) {
-                return new ExternalResponse<List<EquipmentType>, ErrorResponse>
+                return new ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{

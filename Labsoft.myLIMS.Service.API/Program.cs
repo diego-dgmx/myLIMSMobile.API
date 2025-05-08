@@ -73,6 +73,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection("ApiSettings"));
 
 // Add external services scopes
+builder.Services.AddScoped<IAccountsServices, AccountsServices>();
 builder.Services.AddScoped<IAuthServices, AuthServices>();
 builder.Services.AddScoped<ISamplesServices, SamplesServices>();
 builder.Services.AddScoped<ISampleAnalysisServices, SampleAnalysisServices>();
@@ -90,6 +91,9 @@ builder.Services.AddScoped<IScheduleInterventionsServices, ScheduleInterventions
 builder.Services.AddScoped<IServiceAreasServices, ServiceAreasServices>();
 builder.Services.AddScoped<IServiceCentersServices, ServiceCentersServices>();
 builder.Services.AddScoped<IInfosServices, InfosServices>();
+builder.Services.AddScoped<IInterventionTypesServices, InterventionTypesServices>();
+builder.Services.AddScoped<IAnalysisGroupsServices, AnalysisGroupsServices>();
+builder.Services.AddScoped<ISpecificationsServices, SpecificationsServices>();
 
 var app = builder.Build();
 

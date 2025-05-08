@@ -1,7 +1,7 @@
 using Entities;
 using LabsoftAPI;
 
-namespace Services
+namespace Interfaces
 {
     public interface IServiceAreasServices
     {

@@ -6,51 +6,41 @@ using LabsoftAPI;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
-namespace Services
-{
-    public class AccountsService : IAccountsService
+namespace Services {
+    public class SpecificationsServices(HttpClient httpClient, IOptions<ApiSettings> settings) : ISpecificationsServices
     {
-        private readonly HttpClient _httpClient;
-        private readonly ApiSettings _settings;
+        private readonly HttpClient _httpClient = httpClient;
+        private readonly ApiSettings _settings = settings.Value;
 
-        public AccountsService(HttpClient httpClient, IOptions<ApiSettings> settings)
-        {
-            _httpClient = httpClient;
-            _settings = settings.Value;
-        }
-
-        public async Task<ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>> GetAccounts(int? accountType)
+        public async Task<ExternalResponse<List<SpecificationBasic>, ErrorResponse>> GetSpecifications()
         {
             try
             {
                 _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-                var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/Accounts");
+                var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/v2/Specifications");
                 var query = HttpUtility.ParseQueryString(uriBuilder.Query);
                 query["$inlinecount"] = "allpages";
-
-                if(accountType != null)
-                {
-                    query["$accountType"] = $"{accountType}";
-                }
+                query["$top"] = "1000";
+                query["$filter"] = "Active eq true and ControlPlan eq false";
 
                 uriBuilder.Query = query.ToString();
 
                 var response = await _httpClient.GetAsync(uriBuilder.ToString());
 
                 var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<Account>>(json);
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<SpecificationBasic>>(json);
 
                 if(response.IsSuccessStatusCode)
                 {
-                    return new ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>
+                    return new ExternalResponse<List<SpecificationBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
-                        Success = myLIMSResponse
+                        Success = myLIMSResponse?.Result
                     };
                 }
                 else
                 {
-                    return new ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>
+                    return new ExternalResponse<List<SpecificationBasic>, ErrorResponse>
                     {
                         StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
@@ -64,7 +54,7 @@ namespace Services
                 }
             }
             catch(Exception ex) {
-                return new ExternalResponse<MyLIMSResponseBase<Account>, ErrorResponse>
+                return new ExternalResponse<List<SpecificationBasic>, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{

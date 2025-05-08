@@ -16,6 +16,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         private readonly IMethodsServices _methodsServices = methodsServices;
         private readonly ILogger<MethodsController> _logger = logger;
 
+        [HttpGet]
+        public async Task<ActionResult<ResponseBase<List<AnalysisMethod>>>> Get()
+        {
+            var response = await _methodsServices.GetMethods();
+
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<AnalysisMethod>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
         [HttpGet("{methodId}/AnalysisMethodInstruction")]
         public async Task<ActionResult<ResponseBase<string>>> AnalysisMethodInstruction(int methodId)
         {
@@ -56,6 +86,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 var results = response.Success ?? [];
 
                 return StatusCode(response.StatusCode, new ResponseBase<List<MethodPrerequisiteAnalysisBasic>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("MethodAnalysisByMethodId")]
+        public async Task<ActionResult<ResponseBase<List<MethodAnalysisBasic>>>> GetMethodAnalysisByMethodId([FromQuery] int methodId)
+        {
+            var response = await _methodsServices.GetMethodAnalysisByMethodId(methodId);
+
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<MethodAnalysisBasic>>
                 {
                     Data = results
                 });

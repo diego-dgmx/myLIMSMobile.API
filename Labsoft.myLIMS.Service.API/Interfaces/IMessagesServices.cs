@@ -1,6 +1,6 @@
 using LabsoftAPI;
 
-namespace Services {
+namespace Interfaces {
     public interface IMessagesServices
     {
         Task<ExternalResponse<List<MessageBasic>, ErrorResponse>> GetMessagesBySampleId(int sampleId);

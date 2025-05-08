@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -798,6 +799,60 @@ namespace Services {
             }
             catch(Exception ex) {
                 return new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetAvailableConsumablesByConsumableTypeId(int consumableTypeId)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/ConsumableApi/ConsumableAvailable");
+                var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+                query["$inlinecount"] = "allpages";
+                query["consumableTypeId"] = consumableTypeId.ToString();
+                query["consumableUsedId"] = "174";
+
+                uriBuilder.Query = query.ToString();
+
+                var response = await _httpClient.GetAsync(uriBuilder.ToString());
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBasic<List<SimpleConsumableBasic>>>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.Items
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{

@@ -4,26 +4,26 @@ using LabsoftAPI;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Controllers
+namespace Labsoft.myLIMS.Service.API.Controllers
 {
     [Authorize]
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class AccountsController(IAccountsServices accountsService, ILogger<AccountsController> logger) : ControllerBase
+    public class AnalysisGroupsController(IAnalysisGroupsServices analysisGroupsServices, ILogger<AnalysisGroupsController> logger) : ControllerBase
     {
-        private readonly IAccountsServices _accountsService = accountsService;
-        private readonly ILogger<AccountsController> _logger = logger;
+        private readonly IAnalysisGroupsServices _analysisGroupsServices = analysisGroupsServices;
+        private readonly ILogger<AnalysisGroupsController> _logger = logger;
 
         [HttpGet]
-        public async Task<ActionResult<ResponseBase<List<Account>>>> Get([FromQuery] int? accountTypeId)
+        public async Task<ActionResult<ResponseBase<List<AnalysisGroupBasic>>>> Get()
         {
-            var response = await _accountsService.GetAccounts(accountTypeId);
+            var response = await _analysisGroupsServices.GetAnalysisGroups();
 
             if(response.StatusCode == 200)
             {
-                var results = response.Success?.Result ?? [];
+                var results = response.Success ?? [];
 
-                return StatusCode(response.StatusCode, new ResponseBase<List<Account>>
+                return StatusCode(response.StatusCode, new ResponseBase<List<AnalysisGroupBasic>>
                 {
                     Data = results
                 });

@@ -1,6 +1,6 @@
 using LabsoftAPI;
 
-namespace Services {
+namespace Interfaces {
     public interface ISamplesServices
     {
         Task<ExternalResponse<MyLIMSResponseBase<AnalysisSample>, ErrorResponse>> GetAllSamples(int? sampleType = null, string? sortParam = null, string? filter = null, int? top = null, int? skip = null);

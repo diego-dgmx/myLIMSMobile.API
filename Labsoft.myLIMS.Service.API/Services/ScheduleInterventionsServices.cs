@@ -1,7 +1,9 @@
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web;
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -180,6 +182,54 @@ namespace Services {
             }
         }
 
+        public async Task<ExternalResponse<ScheduleInterventionBasic, ErrorResponse>> GetScheduleIntervention(string? identityCenterToken, string? identityCompany, int id)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var response = await _httpClient.GetAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/{id}");
+
+                var json = await response.Content.ReadAsStringAsync();
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    var myLIMSResponse = JsonConvert.DeserializeObject<ScheduleInterventionBasic>(json);
+                    return new ExternalResponse<ScheduleInterventionBasic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<ScheduleInterventionBasic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<ScheduleInterventionBasic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
         public async Task<ExternalResponse<List<ScheduleSampleInterventionBasic>, ErrorResponse>> GetScheduleSampleInterventions(string? identityCenterToken, string? identityCompany, int id)
         {
             try
@@ -265,6 +315,237 @@ namespace Services {
             }
             catch(Exception ex) {
                 return new ExternalResponse<List<ScheduleSpecificationBasic>, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<int, ErrorResponse>> CreateScheduleIntervention(string? identityCenterToken, string? identityCompany, ScheduleInterventionCreateDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PostAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<ScheduleInterventionDTO>(json);
+                Console.WriteLine(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.ScheduleInterventionId ?? 0
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<int, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<dynamic, ErrorResponse>> UpdateScheduleIntervention(string? identityCenterToken, string? identityCompany, ScheduleInterventionUpdateDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PutAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/{body.Id}", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<dynamic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<dynamic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<int, ErrorResponse>> CreateScheduleInterventionRoutine(string? identityCenterToken, string? identityCompany, ScheduleInterventionDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PostAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/ScheduleInterventionRoutine", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<TasksNextStatus>(json);
+                Console.WriteLine(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.SampleId ?? 0
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<int, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
+
+        public async Task<ExternalResponse<int, ErrorResponse>> CreateScheduleInterventionExtraordinary(string? identityCenterToken, string? identityCompany, ScheduleInterventionDTO body)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
+                _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(body),
+                    Encoding.UTF8, "application/json"
+                );
+
+                var response = await _httpClient.PostAsync(
+                    $"{_settings.LabsoftMyLIMSApiURLBase}/v1/ScheduleIntervention/ScheduleInterventionExtraordinary", content);
+
+                var json = await response.Content.ReadAsStringAsync();
+                var myLIMSResponse = JsonConvert.DeserializeObject<TasksNextStatus>(json);
+                Console.WriteLine(json);
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.SampleId ?? 0
+                    };
+                }
+                else
+                {
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    Match match = Regex.Match(json, errorDescriptionPattern);
+
+                    return new ExternalResponse<int, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = match.Groups[1].Value.Replace("\\\"", "").Replace("\"", "").Trim(),
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<int, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{

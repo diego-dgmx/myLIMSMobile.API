@@ -1,6 +1,6 @@
 using LabsoftAPI;
 
-namespace Services {
+namespace Interfaces {
     public interface IEquipmentTypesServices
     {
         Task<ExternalResponse<List<EquipmentType>, ErrorResponse>> GetEquipmentTypes();

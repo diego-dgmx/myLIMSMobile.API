@@ -1,6 +1,6 @@
 using LabsoftAPI;
 
-namespace Services {
+namespace Interfaces {
     public interface IFilesServices
     {
         Task<ExternalResponse<UploadFileResponse, ErrorResponse>> UploadFile(string? identityCenterToken, string? identityCompany, IFormFile file);

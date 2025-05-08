@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Headers;
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -95,7 +96,7 @@ namespace Services {
                     fileContent
                 };
 
-                var response = await _httpClient.PostAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Messages/SendMessageWithEntitiesAttached", formData);
+                var response = await _httpClient.PostAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Files", formData);
 
                 var json = await response.Content.ReadAsStringAsync();
                 var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);

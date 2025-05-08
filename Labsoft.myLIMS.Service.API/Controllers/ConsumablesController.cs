@@ -19,7 +19,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         private enum ConsumableSortParam
         {
             identification,
-            consumableType
+            consumableType,
+            expires
         }
 
         [HttpGet("")]
@@ -37,6 +38,9 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                         break;
                     case ConsumableSortParam.consumableType:
                         sortParam = "ConsumableType/Id";
+                        break;
+                    case ConsumableSortParam.expires:
+                        sortParam = "Expires";
                         break;
                 }
             }
@@ -384,7 +388,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         public async Task<ActionResult<ResponseBase<dynamic>>> AddStock(
             [FromBody] UpdateStockDTO body)
         {
-            var response = await _consumablesServices.RemoveStock(body);
+            var response = await _consumablesServices.AddStock(body);
             
             if(response.StatusCode == 200)
             {
@@ -477,7 +481,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpPost("")]
+        [HttpPost]
         public async Task<ActionResult<ResponseBase<int>>> CreateConsumable([FromBody] ConsumableCreateDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
@@ -509,7 +513,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpPut("")]
+        [HttpPut]
         public async Task<ActionResult<ResponseBase<dynamic>>> UpdateConsumable([FromBody] ConsumableUpdateDTO body)
         {
             var identityCenterToken = User.Claims.FirstOrDefault(c => c.Type == "nested_jwt")?.Value;
@@ -523,6 +527,36 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 return StatusCode(response.StatusCode, new ResponseBase<dynamic>
                 {
                     Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpGet("Available{consumableTypeId}/ByConsumableTypeId")]
+        public async Task<ActionResult<ResponseBase<List<SimpleConsumableBasic>>>> AvailableConsumablesByConsumableTypeId(int consumableTypeId)
+        {
+            var response = await _consumablesServices.GetAvailableConsumablesByConsumableTypeId(consumableTypeId);
+            
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<SimpleConsumableBasic>>
+                {
+                    Data = results
                 });
             }
             else

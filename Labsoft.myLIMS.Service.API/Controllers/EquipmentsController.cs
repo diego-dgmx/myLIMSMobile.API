@@ -45,5 +45,35 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                 });
             }
         }
+
+        [HttpGet("ByServiceCenters")]
+        public async Task<ActionResult<ResponseBase<List<Equipment>>>> ByServiceCenters()
+        {
+            var response = await _equipmentsServices.GetEquipmentsByServiceCenters();
+
+            if(response.StatusCode == 200)
+            {
+                var results = response.Success ?? [];
+
+                return StatusCode(response.StatusCode, new ResponseBase<List<Equipment>>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
     }
 }

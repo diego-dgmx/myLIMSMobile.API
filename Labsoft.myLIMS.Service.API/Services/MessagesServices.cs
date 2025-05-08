@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text;
 using Entities;
+using Interfaces;
 using LabsoftAPI;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
