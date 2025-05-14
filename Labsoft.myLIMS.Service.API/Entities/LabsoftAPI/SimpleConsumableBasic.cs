@@ -6,6 +6,6 @@ namespace LabsoftAPI {
         public DateTime? Expires { get; set; }
         public int? ExpireDaysAfterOpen { get; set; }
         public double? Quantity { get; set; }
-        public double? Cost { get; set; }
+        public ConsumableTypeBasic? ConsumableType { get; set; }
     }
 }

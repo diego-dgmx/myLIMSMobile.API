@@ -94,6 +94,39 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
+        [Authorize]
+        [HttpGet("UserDataById/{id}")]
+        public async Task<ActionResult<ResponseBase<UserDataBasic>>> UserDataById(int id)
+        {
+            var response = await _authServices.UserDataById(id);
+            
+            if(response.StatusCode == 200)
+            {
+                var result = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<UserDataBasic>
+                {
+                    Ok = response.Success != null,
+                    Data = result
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [Authorize]
         [HttpPost("LogoutBySessionId")]
         public async Task<ActionResult<ResponseBase<dynamic>>> LogoutBySessionId([FromBody] string sessionId)
         {

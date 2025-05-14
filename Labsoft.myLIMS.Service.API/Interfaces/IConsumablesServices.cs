@@ -18,7 +18,6 @@ namespace Interfaces {
             string? identityCenterToken, string? identityCompany, int id);
         Task<ExternalResponse<List<ConsumableServiceCenterBasic>, ErrorResponse>> GetConsumableServiceCenters(
             string? identityCenterToken, string? identityCompany, int id);
-        Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetConsumablesByConsumableTypeId(int consumableTypeId);
         Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetAvailableConsumablesByConsumableTypeId(int consumableTypeId);
         Task<ExternalResponse<dynamic, ErrorResponse>> SetConsumptionInAnalysis(ConsumableConsumptionInAnalysisDTO body);
         Task<ExternalResponse<string, ErrorResponse>> InactivateMovement(

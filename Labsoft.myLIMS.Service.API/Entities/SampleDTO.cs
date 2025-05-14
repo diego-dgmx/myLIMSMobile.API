@@ -10,6 +10,7 @@ namespace Entities
         public DateTime? TakenDateTime { get; set; }
         public DateTime? ReceivedTime { get; set; }
         public List<QCTests>? QCTests { get; set; }
+        public List<PrerequisiteAnalysesBasic>? PrerequisiteAnalyses { get; set; }
         public CurrentStatus? CurrentStatus { get; set; }
         public SampleServiceArea? ServiceArea { get; set; }
         public SampleType? SampleType { get; set; }

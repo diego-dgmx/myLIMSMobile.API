@@ -160,5 +160,53 @@ namespace Services {
                 };
             }
         }
+
+        public async Task<ExternalResponse<UserDataBasic, ErrorResponse>> UserDataById(int id)
+        {
+            try
+            {
+                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
+                var response = await _httpClient.GetAsync(
+                    $"{_settings.MyLIMSApiURLBase}/UserApi/GetById?id={id}&includeProperties=UserProfiles.UserProfile.EntitiesActions.EntityAction");
+
+                var json = await response.Content.ReadAsStringAsync();
+            
+                if(response.IsSuccessStatusCode)
+                {
+                    var myLIMSResponse = JsonConvert.DeserializeObject<UserDataBasic>(json);
+
+                    return new ExternalResponse<UserDataBasic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse
+                    };
+                }
+                else
+                {
+                    return new ExternalResponse<UserDataBasic, ErrorResponse>
+                    {
+                        StatusCode = (int) response.StatusCode,
+                        Error = new ErrorResponse
+                        {
+                            Error = "external_request_error",
+                            ErrorDescription = "request_error",
+                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
+                                new Exception(json) : null
+                        }
+                    };
+                }
+            }
+            catch(Exception ex) {
+                return new ExternalResponse<UserDataBasic, ErrorResponse>
+                {
+                    StatusCode = (int) HttpStatusCode.InternalServerError,
+                    Error = new ErrorResponse{
+                        Error = "unknown_error",
+                        ErrorDescription = "exception_error",
+                        Exception = ex
+                    }
+                };
+            }
+        }
     }
 }

@@ -295,7 +295,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
         [HttpGet("{consumableTypeId}/ByConsumableTypeId")]
         public async Task<ActionResult<ResponseBase<List<SimpleConsumableBasic>>>> ByConsumableTypeId(int consumableTypeId)
         {
-            var response = await _consumablesServices.GetConsumablesByConsumableTypeId(consumableTypeId);
+            var response = await _consumablesServices.GetAvailableConsumablesByConsumableTypeId(consumableTypeId);
             
             if(response.StatusCode == 200)
             {
@@ -545,7 +545,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             }
         }
 
-        [HttpGet("Available{consumableTypeId}/ByConsumableTypeId")]
+        [HttpGet("Available/{consumableTypeId}/ByConsumableTypeId")]
         public async Task<ActionResult<ResponseBase<List<SimpleConsumableBasic>>>> AvailableConsumablesByConsumableTypeId(int consumableTypeId)
         {
             var response = await _consumablesServices.GetAvailableConsumablesByConsumableTypeId(consumableTypeId);

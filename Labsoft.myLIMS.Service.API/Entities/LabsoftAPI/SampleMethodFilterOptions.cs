@@ -16,6 +16,7 @@ namespace LabsoftAPI {
     public class FilterOptionBasic
     {
         public int? Id { get; set; }
+        public int? MasterId { get; set; }
         public string? Identification { get; set; }
     }
 

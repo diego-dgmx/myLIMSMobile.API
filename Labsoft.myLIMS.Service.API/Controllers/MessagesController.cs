@@ -83,6 +83,37 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             var identityCompany = User.Claims.FirstOrDefault(c => c.Type == "nested_company")?.Value;
             var response = await _messagesServices.SendMessage(identityCenterToken, identityCompany, body);
             
+            if(response.StatusCode == 201)
+            {
+                var results = response.Success;
+
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Data = results
+                });
+            }
+            else
+            {
+                LogConfiguration.CreateLogSender(HttpContext.Request, _logger, response.Error?.Exception);
+                return StatusCode(response.StatusCode, new ResponseBase<dynamic>
+                {
+                    Ok = false,
+                    Message = response.Error?.ErrorDescription,
+                    Error = new ErrorBase
+                    {
+                        Code = response.Error?.Error,
+                        Description = response.Error?.ErrorDescription
+                    }
+                });
+            }
+        }
+
+        [HttpPut("UpdateActiveStatus")]
+        public async Task<ActionResult<ResponseBase<dynamic>>> UpdateActiveStatus(
+            [FromBody] UpdateMessageActiveStatusDTO body)
+        {
+            var response = await _messagesServices.UpdateActiveStatus(body);
+
             if(response.StatusCode == 200)
             {
                 var results = response.Success;

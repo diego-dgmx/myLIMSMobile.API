@@ -236,53 +236,6 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>> GetConsumablesByConsumableTypeId(int consumableTypeId)
-        {
-            try
-            {
-                _httpClient.DefaultRequestHeaders.Add("x-access-key", _settings.MyLIMSApiAccessKey);
-
-                var response = await _httpClient.GetAsync($"{_settings.MyLIMSApiURLBase}/v2/Consumables/GetByConsumableTypeIdForMovement?consumableTypeId={consumableTypeId}");
-
-                var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBase<SimpleConsumableBasic>>(json);
-            
-                if(response.IsSuccessStatusCode)
-                {
-                    return new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
-                    {
-                        StatusCode = (int) response.StatusCode,
-                        Success = myLIMSResponse?.Result
-                    };
-                }
-                else
-                {
-                    return new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
-                    {
-                        StatusCode = (int) response.StatusCode,
-                        Error = new ErrorResponse
-                        {
-                            Error = "external_request_error",
-                            ErrorDescription = "request_error",
-                            Exception = response.StatusCode == HttpStatusCode.InternalServerError ?
-                                new Exception(json) : null
-                        }
-                    };
-                }
-            }
-            catch(Exception ex) {
-                return new ExternalResponse<List<SimpleConsumableBasic>, ErrorResponse>
-                {
-                    StatusCode = (int) HttpStatusCode.InternalServerError,
-                    Error = new ErrorResponse{
-                        Error = "unknown_error",
-                        ErrorDescription = "exception_error",
-                        Exception = ex
-                    }
-                };
-            }
-        }
-
         public async Task<ExternalResponse<List<ConsumableServiceAreaBasic>, ErrorResponse>> GetConsumableServiceAreas(string? identityCenterToken, string? identityCompany, int id)
         {
             try
@@ -724,7 +677,7 @@ namespace Services {
                 }
                 else
                 {
-                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorCodes:\s*(.*)";
                     Match match = Regex.Match(json, errorDescriptionPattern);
 
                     return new ExternalResponse<int, ErrorResponse>
@@ -770,6 +723,8 @@ namespace Services {
 
                 var json = await response.Content.ReadAsStringAsync();
                 var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
+
+                Console.WriteLine(json);
             
                 if(response.IsSuccessStatusCode)
                 {
@@ -781,7 +736,7 @@ namespace Services {
                 }
                 else
                 {
-                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorDescription:\s*(.*)";
+                    string errorDescriptionPattern = @"LabsoftmyLIMSErrorCodes:\s*(.*)";
                     Match match = Regex.Match(json, errorDescriptionPattern);
 
                     return new ExternalResponse<dynamic, ErrorResponse>
@@ -798,6 +753,7 @@ namespace Services {
                 }
             }
             catch(Exception ex) {
+                Console.WriteLine($"Exception: {ex}");
                 return new ExternalResponse<dynamic, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
@@ -818,14 +774,17 @@ namespace Services {
                 var uriBuilder = new UriBuilder($"{_settings.MyLIMSApiURLBase}/ConsumableApi/ConsumableAvailable");
                 var query = HttpUtility.ParseQueryString(uriBuilder.Query);
                 query["$inlinecount"] = "allpages";
+                query["top"] = "1000";
+                query["$orderby"] = "Expires";
                 query["consumableTypeId"] = consumableTypeId.ToString();
-                query["consumableUsedId"] = "174";
+                query["consumableUsedId"] = "null";
 
                 uriBuilder.Query = query.ToString();
 
                 var response = await _httpClient.GetAsync(uriBuilder.ToString());
 
                 var json = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(json);
                 var myLIMSResponse = JsonConvert.DeserializeObject<MyLIMSResponseBasic<List<SimpleConsumableBasic>>>(json);
             
                 if(response.IsSuccessStatusCode)

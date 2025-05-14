@@ -655,7 +655,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
             [FromQuery] int[] serviceAreaIds,
             [FromQuery] int[] sampleTypeIds,
             [FromQuery] int[] startUserIds,
-            [FromQuery] int[] batchNumbers,
+            [FromQuery] string[] batchNumbers,
             [FromQuery] string[] customValues,
             [FromQuery] string[] sampleNumbers,
             [FromQuery] int[] collectionPoints,
@@ -794,8 +794,8 @@ namespace Labsoft.myLIMS.Service.API.Controllers
 
                 if(!batchNumbers.IsNullOrEmpty()) {
                     List<string> values = [];
-                    foreach(int number in batchNumbers) {
-                        values.Add($"contains(b/QCTest/Number, '{number}')");
+                    foreach(string number in batchNumbers) {
+                        values.Add($"contains(b/QCTest/ControlNumber, '{number}')");
                     }
 
                     filter += $"QCTests/any(b: {string.Join(" or ", values)}) and ";
@@ -915,6 +915,7 @@ namespace Labsoft.myLIMS.Service.API.Controllers
                                 PortalSampleStatus = item.Sample?.CurrentStatus?.SampleStatus?.PortalSampleStatus
                             }
                         },
+                        PrerequisiteAnalyses = item.PrerequisiteAnalyses,
                         ServiceArea = new SampleServiceArea
                         {
                             ExtraTime = item.ServiceArea?.ExtraTime,

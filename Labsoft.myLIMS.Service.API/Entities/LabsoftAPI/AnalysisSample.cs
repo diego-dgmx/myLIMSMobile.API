@@ -84,7 +84,7 @@ namespace LabsoftAPI {
     public class AnalysisSample
     {
         public List<QCTests>? QCTests { get; set; }
-        public List<object>? PrerequisiteAnalyses { get; set; }
+        public List<PrerequisiteAnalysesBasic>? PrerequisiteAnalyses { get; set; }
         public int? AnalysisDeadlineEmpty { get; set; }
         public int? ConclusionEmpty { get; set; }
         public SampleCustomInfo? SampleCustomInfo { get; set; }
@@ -95,6 +95,11 @@ namespace LabsoftAPI {
         public AnalysisMethod? Method { get; set; }
         public ServiceArea? ServiceArea { get; set; }
         public CurrentStatus? CurrentStatus { get; set; }
+    }
+
+    public class PrerequisiteAnalysesBasic {
+        public bool? SampleMethodFinalized { get; set; }
+        public string? MethodIdentification { get; set; }
     }
 
     public class Sample

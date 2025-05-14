@@ -21,6 +21,8 @@ namespace Services {
 
                 var json = await response.Content.ReadAsStringAsync();
                 var myLIMSResponse = JsonConvert.DeserializeObject<string>(json);
+
+                Console.WriteLine($"Response: {json}");
             
                 if(response.IsSuccessStatusCode)
                 {
@@ -46,6 +48,7 @@ namespace Services {
                 }
             }
             catch(Exception ex) {
+                Console.WriteLine($"Exception: {ex}");
                 return new ExternalResponse<string, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
@@ -58,7 +61,7 @@ namespace Services {
             }
         }
 
-        public async Task<ExternalResponse<UploadFileResponse, ErrorResponse>> UploadFile(
+        public async Task<ExternalResponse<int, ErrorResponse>> UploadFile(
             string? identityCenterToken, string? identityCompany, IFormFile? file)
         {
             try
@@ -66,9 +69,9 @@ namespace Services {
                 _httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer " + identityCenterToken);
                 _httpClient.DefaultRequestHeaders.Add("company", identityCompany);
 
-                if (file == null && file!.Length == 0)
+                if (file == null || file!.Length == 0)
                 {
-                    return new ExternalResponse<UploadFileResponse, ErrorResponse>
+                    return new ExternalResponse<int, ErrorResponse>
                     {
                         StatusCode = (int) HttpStatusCode.BadRequest,
                         Error = new ErrorResponse{
@@ -96,24 +99,25 @@ namespace Services {
                     fileContent
                 };
 
-                var response = await _httpClient.PostAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Files", formData);
+                var response = await _httpClient.PostAsync($"{_settings.LabsoftMyLIMSApiURLBase}/v1/Files?mustStayOnDB=true", formData);
 
                 var json = await response.Content.ReadAsStringAsync();
-                var myLIMSResponse = JsonConvert.DeserializeObject<dynamic>(json);
             
                 if(response.IsSuccessStatusCode)
                 {
-                    return new ExternalResponse<UploadFileResponse, ErrorResponse>
+                    var myLIMSResponse = JsonConvert.DeserializeObject<UploadFileResponse>(json);
+
+                    return new ExternalResponse<int, ErrorResponse>
                     {
-                        StatusCode = 200,
-                        Success = myLIMSResponse
+                        StatusCode = (int) response.StatusCode,
+                        Success = myLIMSResponse?.Id ?? 0
                     };
                 }
                 else
                 {
-                    return new ExternalResponse<UploadFileResponse, ErrorResponse>
+                    return new ExternalResponse<int, ErrorResponse>
                     {
-                        StatusCode = 400,
+                        StatusCode = (int) response.StatusCode,
                         Error = new ErrorResponse
                         {
                             Error = "external_request_error",
@@ -125,7 +129,7 @@ namespace Services {
                 }
             }
             catch(Exception ex) {
-                return new ExternalResponse<UploadFileResponse, ErrorResponse>
+                return new ExternalResponse<int, ErrorResponse>
                 {
                     StatusCode = (int) HttpStatusCode.InternalServerError,
                     Error = new ErrorResponse{
